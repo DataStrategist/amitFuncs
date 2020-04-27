@@ -83,10 +83,10 @@ gitLister <- function(paff = "."){
     dplyr::mutate(git = TRUE)
   outStuff <- dplyr::left_join(data.frame(name = folders, stringsAsFactors = FALSE),
                                outStuff, by = "name") %>%
-    dplyr::mutate(name = gsub("\\./", "", name))
+    dplyr::mutate(name = gsub("\\.\\./", "", name))
 
 
-  tuffreturn(outStuff)
+  return(outStuff)
 }
 
 #' @title examines all the R files within a folder that have been modified within a certain date
@@ -155,9 +155,9 @@ libraryFinder <- function(parentFolder, howLong = 365, whatLib =.libPaths()[1]){
   CRANstuff <- returnDF %>% dplyr::filter(CRAN) %>% dplyr::pull(library) %>%
     paste(., collapse = '","')
   cat(paste0('___________________________________________\n
-             INSTALL THESE CRAN PACKAGES: \n\n
-             install.packages(c("', CRANstuff,  '"), lib = "', whatLib, '")'))
+INSTALL THESE CRAN PACKAGES: \n\n
+install.packages(c("', CRANstuff,  '"), lib = "', whatLib, '")'))
 
   cat("\n___________________________________________\nNOT ON CRAN \n\n", returnDF %>%
-        dplyr::filter(!CRAN) %>% dplyr::pull(library) %>% sort)
+        dplyr::filter(!CRAN) %>% dplyr::pull(library) %>% sort, "\n\n")
 }

@@ -1,5 +1,9 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 
 # amitFuncs
 
@@ -9,7 +13,8 @@ Random convenience functions from a lazy person
 
 You can install the released version of amitFuncs from github by using:
 
-``` r
+
+```r
 # remotes::install_github("DataStrategist/amitFuncs")
 ```
 
@@ -19,7 +24,8 @@ You can install the released version of amitFuncs from github by using:
 
 Excel like convenience functions:
 
-``` r
+
+```r
 library(amitFuncs)
 left("boom", 1)
 #> [1] "b"
@@ -31,10 +37,10 @@ amitFuncs::mid("boom", 2, 2)
 
 ### gitLister
 
-List all git repos within a certain folder. For example, to list all the
-repos in the folder above your current `getwd()`, type:
+List all git repos within a certain folder. For example, to list all the repos in the folder above your current `getwd()`, type:
 
-``` r
+
+```r
 tail(gitLister(paff = ".."), 5)
 #>                      name  git
 #> 173 Wordcloud.from.folder TRUE
@@ -43,14 +49,14 @@ tail(gitLister(paff = ".."), 5)
 #> 176      xgboost examples TRUE
 #> 177         Youtube stuff TRUE
 ```
+ 
 
 ### libraryFinder
 
-Finds all the libraries used in files modified within `x` days ago. For
-example, to list the libraries required for the current `getwd()` that
-have been modified in the past 2 weeks, type:
+Finds all the libraries used in files modified within `x` days ago. For example, to list the libraries required for the current `getwd()` that have been modified in the past 2 weeks, type:
 
-``` r
+
+```r
 libraryFinder(parentFolder = ".", howLong = 14, whatLib = "c:/temp/")
 #> ___________________________________________
 #> 
@@ -64,5 +70,4 @@ libraryFinder(parentFolder = ".", howLong = 14, whatLib = "c:/temp/")
 #>  ` | amitFuncs
 ```
 
-This will output a command that you can copypaste to install all those
-libraries into a `c:/temp`.
+This will output a command that you can copypaste to install all those libraries into a `c:/temp`.

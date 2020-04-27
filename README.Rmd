@@ -14,36 +14,45 @@ knitr::opts_chunk$set(
 ```
 # amitFuncs
 
-The goal of amitFuncs is to ...
+Random convenience functions from a lazy person
 
 ## Installation
 
-You can install the released version of amitFuncs from [CRAN](https://CRAN.R-project.org) with:
+You can install the released version of amitFuncs from github by using:
 
-``` r
-install.packages("amitFuncs")
+``` {r}
+# remotes::install_github("DataStrategist/amitFuncs")
 ```
 
-## Example
+## Exported Functions
 
-This is a basic example which shows you how to solve a common problem:
+### left, mid, right
 
-```{r example}
-## basic example code
+Excel like convenience functions:
+
+``` {r}
+library(amitFuncs)
+left("boom", 1)
+right("boom", 1)
+amitFuncs::mid("boom", 2, 2)
+
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+### gitLister
 
-```{r cars}
-summary(cars)
+List all git repos within a certain folder. For example, to list all the repos in the folder above your current `getwd()`, type:
+
+```{r}
+tail(gitLister(paff = ".."), 5)
+```
+ 
+
+### libraryFinder
+
+Finds all the libraries used in files modified within `x` days ago. For example, to list the libraries required for the current `getwd()` that have been modified in the past 2 weeks, type:
+
+```{r}
+libraryFinder(parentFolder = ".", howLong = 14, whatLib = "c:/temp/")
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+This will output a command that you can copypaste to install all those libraries into a `c:/temp`.
