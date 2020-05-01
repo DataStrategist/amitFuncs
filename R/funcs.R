@@ -111,7 +111,7 @@ gitLister <- function(paff = "."){
 #' @export
 #' @importFrom tibble rownames_to_column tibble
 #' @importFrom dplyr filter pull %>%
-#' @importFrom purrr map discard map_lgl
+#' @importFrom purrr map discard map_lgl map_chr
 #' @importFrom stringr str_split str_extract str_squish
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_nodes html_text
@@ -160,4 +160,228 @@ install.packages(c("', CRANstuff,  '"), lib = "', whatLib, '")'))
 
   cat("\n___________________________________________\nNOT ON CRAN \n\n", returnDF %>%
         dplyr::filter(!CRAN) %>% dplyr::pull(library) %>% sort, "\n\n")
+}
+
+
+#' @title remove intermediate build artifacts that make package development annoying
+#' @description deletes the past builds by deleting every `tar.gz` file and `Rcheck`
+#' folders in the specified paths. Also will go through every library folder and
+#' delete all `LOCK` folders. Use this function when you are building a package but it
+#' seems your new modifications aren't being implemented.
+#' @param paff what path should we clean? It assumes you're inside a project, therefore
+#' the default value, Default: '..'
+#' @return Nothing is returned, but the files/folders are deleted.
+#' @details CARREFUL!! You're deleting stuff. Please check to make sure this function
+#' does what you think it does.
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[purrr]{map}}
+#' @rdname pleaseForTheLoveOfGodLetMeBuild
+#' @export
+#' @importFrom purrr map
+#' @importFrom dplyr %>%
+pleaseForTheLoveOfGodLetMeBuild <- function(paff = ".."){
+  ## Remove Rcheck and *.tar.gz
+  list.files(paff, pattern = "Rcheck", full.names = TRUE) %>% purrr::map(~unlink(., recursive = TRUE))
+  list.files(paff, pattern = "tar.gz", full.names = TRUE) %>% purrr::map(~file.remove(.))
+
+  ## Remove those 00LOCK jerk folders
+  .libPaths() %>% purrr::map(~list.files(path = ., pattern = "00LOCK", full.names = TRUE)) %>% unlist %>%
+    purrr::map(~unlink(., recursive = TRUE))
+}
+
+#' @title Identify which folders are git repos, runs `gc` on  git folders, and analyzes.
+#' @description This function will output a dataframe that will state whether folders
+#' within a specified folder are git repos, and their status. By status I mean,
+#' what's the currently checked-out branch, whether
+#' there are any changes noticed between the local repo and the remote.
+#' @param matchingText PARAM_DESCRIPTION, Default: '.'
+#' @param paff path to the file, Default: '..'
+#' @return will return a dataframe with the following fields: name,gitRepo (T/F),
+#' branch(currently checked out branch), status (ok, behind or ahead of the remote),
+#' toCommit (local changes).
+#'
+#' Also, the console will print out folders that are NOT git repos, folders that ARE git
+#' repos but are NOT on the master branch, and git repos that are in general not synced
+#' with the remote.
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[purrr]{map}}
+#'  \code{\link[tibble]{tibble}}
+#'  \code{\link[dplyr]{mutate}}
+#' @rdname gitOrganizer
+#' @export
+#' @importFrom purrr map
+#' @importFrom tidyr pivot_longer pivot_wider
+#' @importFrom tibble tibble
+#' @importFrom dplyr mutate %>% full_join group_by summarize case_when arrange
+gitOrganizer <- function(paff = "..", matchingText = "."){
+  ## Run garbage collection on all repos:
+  repos <- list.files(paff, pattern = matchingText)
+  gc <- repos %>%
+    purrr::map(~shell(paste0('cd .. && cd "./', ., '" && git gc')))
+
+  ## Which repos have never been added to github:
+  gitOrNot <- tibble::tibble(name = repos, gitRepo = gc %>% as.character) %>%
+    dplyr::mutate(gitRepo = ifelse(gitRepo == 0, TRUE, FALSE))
+
+  ## Gather the status of each of these github repos
+  gitstatus <- repos %>%
+    map(~shell(paste0('cd .. && cd "./', ., '" && git status'), intern = TRUE))
+
+  ## clean up output
+  gitstatus <- tibble(name = repos, result = gitstatus) %>% unnest(result) %>%
+    filter(!grepl("fatal", result)) %>%
+    mutate(branch = ifelse(grepl("On branch", result), gsub(".+branch ", "", result), NA)) %>%
+    mutate(status = ifelse(grepl("Your branch", result), gsub(".+branch ", "", result), NA)) %>%
+    mutate(toCommit = ifelse(grepl("commit|track", result), gsub(".+branch ", "", result), NA)) %>%
+    filter(!grepl("\\(use", toCommit)) %>% select(-result) %>%
+    pivot_longer(cols = branch:toCommit, names_to = "b", values_to = "value") %>%
+    filter(!is.na(value)) %>% group_by(name, b) %>%
+    summarize(value = paste(value, collapse= ";")) %>%
+    mutate(value = gsub(":", "", value)) %>%
+    pivot_wider(names_from = b, values_from = value) %>%
+    mutate(status = case_when(
+      grepl("up to date", status) ~ "OK",
+      grepl("behind", status) ~ "behind",
+      grepl("ahead", status) ~ "ahead",
+      TRUE ~ status
+    )) %>%
+    mutate(toCommit = case_when(
+      toCommit == "nothing to commit, working tree clean" ~ "OK",
+      grepl("Changes not staged for commit", toCommit) ~ "Unstaged",
+      grepl("	is behind", toCommit) ~ NA_character_,
+
+      TRUE ~ toCommit
+    ))
+
+  ## merge w/ gitstatus
+  finalDF <- full_join(gitOrNot, gitstatus, by = "name") %>% arrange(name)
+
+  ## cat out some quick analysis:
+  finalDF %>% filter(!gitRepo) %>% pull(name) %>% paste(collapse = '\n\t\t') %>%
+    cat("\n\nThese folders are NOT git repos: ", "\n\t\t",.)
+  finalDF %>% filter(branch != "master") %>% pull(name) %>% paste(collapse = '\n\t\t') %>%
+    cat("\n\nThese repos are NOT on master: ", "\n\t\t",.)
+  finalDF %>% filter(status != "OK" | toCommit != "OK") %>% pull(name) %>% paste(collapse = '\n\t\t') %>%
+    cat("\n\nThese repos are not synced w/ remote: ", "\n\t\t",., "\n\n")
+  return(finalDF)
+}
+
+packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
+  ## install packages (but make sure from above you're on master for all of them.)
+  toInstall <- list.files("..", pattern = "AVDG")
+
+  Installer <- toInstall %>%
+    map(~shell(paste0('R CMD INSTALL ../', .), intern = TRUE))
+
+  Installer %>% map_chr(~tail(., 1)) %>% set_names(toInstall) %>% enframe %>% unnest(value)
+}
+
+
+#' @title find functions used in each of the functions in a speficied R file
+#' @description This function is suitable to identify what exports are required when
+#' designing a package
+#' @param paff path to the file, Default: 'R'
+#' @param matchingText PARAM_DESCRIPTION, Default: '.'
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[tibble]{tibble}}
+#'  \code{\link[tidyr]{fill}}
+#' @rdname functionsUsedFinder
+#' @export
+#' @importFrom tibble tibble
+#' @importFrom tidyr fill
+#' @importFrom readr read_lines
+functionsUsedFinder <- function(paff = "R", matchingText = "."){
+  ## read all files in selected folder and matching the specified text
+  a <- list.files(paff, matchingText, full.names = TRUE) %>%
+    map(read_lines) %>%
+    ## but throw away comments
+    unlist %>% discard(~left(., 1) == "#")
+
+
+  ## Grab everything that has an open parenthesis or a package-call
+  output <- a %>% unlist %>%
+    str_extract(".+ ?<- ?function|[a-zA-Z0-9\\._\\-:]+(?=\\()") %>%
+    discard(~is.na(.)) %>%
+    discard(~left(., 1) == "_")
+
+  ## and prepare to show what functions are used in what functions
+  output <- output %>%
+    tibble::tibble(
+      mainFunc = ifelse(grepl("<-", output),
+                                       gsub(" <-.", "", output),
+                                       NA),
+      usedFuncs = .) %>%
+    tidyr::fill(mainFunc) %>%
+    mutate(b=grepl("<-", usedFuncs)) %>% filter(!b) %>% select(-b) %>%
+    unique()
+
+  return(output)
+}
+
+
+
+
+# network -----------------------------------------------------------------
+
+
+#' @title convert an edge list into 2 data frames: nodes and edges
+#' @description This function takes a data.frame like with two or three columns:
+#' `FROM` and `TO` (and potentially `VALUE`) and outputs a list containing two
+#' dataframes: Nodes and Edges. The simplest way to accomplish this task would be to
+#' create an edge list using the igraph function `igraph::from_edgelist()`, and then
+#' subsequently we could use `igraph::as_data_frame()` to create each data.frame.
+#' This function provides some additional functionality for convenience for the
+#' extremely lazy, suitable for subsequent manipulation
+#'
+#' @param df dataframe with edgeList
+#' @param Index Should the IDs of nodes start from 0 or 1. The indexing is important.
+#' By default, the edges will be 1-indexed (for VisNetwork), but if you're using
+#' network3d, change the indexing to 0, Default: 1
+#' @return output will be a list containing both dataframes
+#' @details nothin
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname edgeListToNodesEdges
+#' @export
+
+edgeListToNodesEdges <- function(df,Index=1){
+  nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
+  nodes[,1] <- as.character(nodes[,1])
+
+  ## and match to IDs to make edges
+  edges <- data.frame(from= match(df[,1],nodes$name),
+                      to=   match(df[,2],nodes$name),
+                      value=df[,3])
+
+  ## indexing
+  if (Index==0){
+    edges$from <- as.integer(edges$from - 1)
+    edges$to <- as.integer(edges$to - 1)
+  }
+  list(nodes=nodes,edges=edges)
 }

@@ -2,7 +2,7 @@ Package: amitFuncs
 Type: Package
 Title: Random Assortment Of Convenience Functions By Amit
 Version: 0.1.0
-Author: person(given = "Amit", family = "Kohli",
+Authors@R: person(given = "Amit", family = "Kohli",
            role = c("aut", "cre"),
            email = "mexindian@gmail.com")
 Description: So I'm fairly lazy and there's many small things that should be easier. This package helps w/ that.
