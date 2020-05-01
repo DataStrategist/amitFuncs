@@ -279,14 +279,48 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
   return(finalDF)
 }
 
+#' @title Build all packages within a folder that match a text string
+#' @description When multiple people work on many repos, it it easy to see
+#' if you are git pulled/pushed up, but it can be difficult or tedious to
+#' see if you have built the latest version of each package. Therefore this
+#' function helps install all repos that match a certain text-pattern.
+#' @param paff path to the folder containing all the packages to build
+#' @param matchingText text string that will be used to determine what packages to build
+#' @param onlyMaster should we only build repos that are on MASTER branch, Default: TRUE
+#' @return returns an output of whether the installs were completed successfully or not.
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname packageBulkInstaller
+#' @export
+#' @importFrom purrr set_names map
+#' @importFrom tibble enframe
+#' @importFrom tidyr unnest
+#' @importFrom dplyr filter pull
 packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
   ## install packages (but make sure from above you're on master for all of them.)
-  toInstall <- list.files("..", pattern = "AVDG")
+  toInstall <- list.files(paff, pattern = matchingText, full.names = FALSE)
 
-  Installer <- toInstall %>%
-    map(~shell(paste0('R CMD INSTALL ../', .), intern = TRUE))
+  ## if selected, filter down to master branch.
+  if (onlyMaster) {
+    gitstatus <- toInstall %>% purrr::set_names() %>%
+      purrr::map(~shell(paste0('cd ',paff,' && cd "./', ., '" && git status'), intern = TRUE))
 
-  Installer %>% map_chr(~tail(., 1)) %>% set_names(toInstall) %>% enframe %>% unnest(value)
+    allowed <- gitstatus %>% purrr::map(~head(., 1)) %>% tibble::enframe() %>%
+    tidyr::unnest(value) %>% dplyr::filter(grepl("master", value)) %>%
+      dplyr::pull(name)
+
+    toInstall <- allowed
+  }
+
+  Installer <- toInstall %>% set_names %>%
+    purrr::map(~shell(paste0('R CMD INSTALL ', paff, '/', .), intern = TRUE))
+
+  Installer %>% map_chr(~tail(., 1)) %>% enframe %>% unnest(value)
 }
 
 
