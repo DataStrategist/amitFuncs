@@ -230,7 +230,7 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
   ## Run garbage collection on all repos:
   repos <- list.files(paff, pattern = matchingText)
   gc <- repos %>%
-    purrr::map(~shell(paste0('cd .. && cd "./', ., '" && git gc')))
+    purrr::map(~system(paste0('cd .. && cd "./', ., '" && git gc')))
 
   ## Which repos have never been added to github:
   gitOrNot <- tibble::tibble(name = repos, gitRepo = gc %>% as.character) %>%
@@ -238,7 +238,7 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
 
   ## Gather the status of each of these github repos
   gitstatus <- repos %>%
-    map(~shell(paste0('cd .. && cd "./', ., '" && git status'), intern = TRUE))
+    map(~system(paste0('cd .. && cd "./', ., '" && git status'), intern = TRUE))
 
   ## clean up output
   gitstatus <- tibble(name = repos, result = gitstatus) %>% unnest(result) %>%
@@ -308,7 +308,7 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
   ## if selected, filter down to master branch.
   if (onlyMaster) {
     gitstatus <- toInstall %>% purrr::set_names() %>%
-      purrr::map(~shell(paste0('cd ',paff,' && cd "./', ., '" && git status'), intern = TRUE))
+      purrr::map(~system(paste0('cd ',paff,' && cd "./', ., '" && git status'), intern = TRUE))
 
     allowed <- gitstatus %>% purrr::map(~head(., 1)) %>% tibble::enframe() %>%
     tidyr::unnest(value) %>% dplyr::filter(grepl("master", value)) %>%
@@ -318,9 +318,10 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
   }
 
   Installer <- toInstall %>% set_names %>%
-    purrr::map(~shell(paste0('R CMD INSTALL ', paff, '/', .), intern = TRUE))
+    purrr::map(~system(paste0('R CMD INSTALL ', paff, '/', .), intern = TRUE))
+  browser()
 
-  Installer %>% map_chr(~tail(., 1)) %>% enframe %>% unnest(value)
+  Installer %>% enframe %>% unnest(value)
 }
 
 
