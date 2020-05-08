@@ -297,7 +297,7 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
 #' }
 #' @rdname packageBulkInstaller
 #' @export
-#' @importFrom purrr set_names map
+#' @importFrom purrr set_names map safely
 #' @importFrom tibble enframe
 #' @importFrom tidyr unnest
 #' @importFrom dplyr filter pull
@@ -318,10 +318,10 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
   }
 
   Installer <- toInstall %>% set_names %>%
-    purrr::map(~system(paste0('R CMD INSTALL ', paff, '/', .), intern = TRUE))
-  browser()
+    purrr::map(~purrr::safely(system)(paste0('R CMD INSTALL ', paff, '/', .), intern = TRUE))
+  # browser()
 
-  Installer %>% enframe %>% unnest(value)
+  Installer %>% map("result") %>% enframe %>% unnest(value)
 }
 
 
