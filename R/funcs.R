@@ -420,3 +420,77 @@ edgeListToNodesEdges <- function(df,Index=1){
   }
   list(nodes=nodes,edges=edges)
 }
+
+
+#' @title Output a list of steps to do
+#' @description There are several steps to complete a package successfully. This function outputs a kind of
+#' opinionated short-list or so
+
+#' @return just outputs to console stuff that should be done.
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname packageMakerList
+#' @export
+
+packageMakerList <- function(){
+
+  txt <-   '-------------------------------------------------------------
+Lets create a package!!! These are the cliffnotes,
+for a full description, check the blog-post or youtube video (in the help file)
+-------------------------------------------------------------------------
+available::available("PKGNAME")
+ - File >> new project >> new directory >> R package` (enable git)
+ - Delete `hello.R` from the `/R` folder
+ - Delete `hello.Rd` from the `/man` folder
+ - Modify the DESCRIPTION
+  person("First", "Last", email = "first.last@example.com",role = c("aut", "cre")))
+library(usethis); library(sinew)
+ - git commit
+use_github(protocol = "https")
+use_readme_rmd()
+usethis::use_lifecycle_badge(stage = "Experimental")
+use_cran_badge()
+usethis::use_mit_license("YOUR NAME")
+use_pkgdown()
+usethis::use_news_md()
+
+ - Create `funcs.R` in the `/R` folder - Copy paste your code inside
+    (Try to be explicit `package::function` at least once per used function per your function)
+ - createOxygen for each function - commit function to memory, doubleclick title, run addin
+sinew::makeImport("R", format = "description") and add to DESCRIPTION
+ - In Build menu >> More >> Configure Build tools >> Generate Documentation >> Install and Restart
+ - Delete NAMESPACE
+
+Use Rstudio Build and install, or do:
+  - devtools::document
+- devtools::build()
+- devtools::install()
+
+devtools::check()
+
+REMEMBER TO CHECK DOCUMENTATION:
+  - Roxygen for each function
+    - README.Rmd
+    - DESCRIPTION
+    - NEWS
+
+pkgdown::build_site()
+
+git commit/push
+set master/docs as the Repos webpage
+
+To think about:
+  usethis::use_code_of_conduct()
+use_testthat()
+amitFuncs::pleaseForTheLoveOfGodLetMeBuild()
+usethis::use_dev_version()
+use_vignette()'
+
+cat(txt)
+
+  }

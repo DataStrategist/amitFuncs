@@ -37,11 +37,11 @@ BenRegMaker <- function(NN,PercentFemale) {
 
   ## Now assign names, Sex-appropriate
   BenReg <- bind_cols(BenReg,
-                      randomNames(NN, BenReg$sex, return.complete.data = T))
+                      randomNames::randomNames(NN, BenReg$sex, return.complete.data = T))
   BenReg
 }
 
-names <- function(NN, which = "first", dispOnly = T){
+gimmeNames <- function(NN, which = "first", dispOnly = T){
   output <- noquote(randomNames::randomNames(NN, which.names = which))
 
   if (dispOnly) {
@@ -50,7 +50,7 @@ names <- function(NN, which = "first", dispOnly = T){
 
 }
 
-countries <- function(){
+gimmeCountries <- function(){
   df <- tibble::as_tibble(countrycode::codelist)
   dplyr::select(df,country = country.name.en, iso2c, iso3c, continent)
 }
