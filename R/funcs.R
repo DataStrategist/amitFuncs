@@ -468,8 +468,10 @@ sinew::makeImport("R", format = "description") and add to DESCRIPTION
 
 Use Rstudio Build and install, or do:
   - devtools::document
-- devtools::build()
-- devtools::install()
+  - devtools::build()
+  - devtools::install()
+
+goodpractice::gp()
 
 devtools::check()
 
@@ -481,11 +483,11 @@ REMEMBER TO CHECK DOCUMENTATION:
 
 pkgdown::build_site()
 
-git commit/push
-set master/docs as the Repos webpage
+ - git commit/push
+ - set master/docs as the Repos webpage
 
-To think about:
-  usethis::use_code_of_conduct()
+ - To think about:
+usethis::use_code_of_conduct()
 use_testthat()
 amitFuncs::pleaseForTheLoveOfGodLetMeBuild()
 usethis::use_dev_version()
