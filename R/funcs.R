@@ -395,6 +395,7 @@ functionsUsedFinder <- function(paff = "R", matchingText = "."){
 #' network3d, change the indexing to 0, Default: 1
 #' @return output will be a list containing both dataframes
 #' @details nothin
+#' @importFrom dplyr pull
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -407,11 +408,13 @@ functionsUsedFinder <- function(paff = "R", matchingText = "."){
 edgeListToNodesEdges <- function(df,Index=1){
   nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
   nodes[,1] <- as.character(nodes[,1])
+  nodes$id <- 1:nrow(nodes)
 
   ## and match to IDs to make edges
-  edges <- data.frame(from= match(df[,1],nodes$name),
-                      to=   match(df[,2],nodes$name),
-                      value=df[,3])
+  edges <- data.frame(from= match(dplyr::pull(df[,1]),nodes$name),
+                      to=   match(pull(df[,2]),nodes$name),
+                      stringsAsFactors = FALSE)
+  if (ncol(df) == 3) edges$value=df[,3]
 
   ## indexing
   if (Index==0){
