@@ -113,6 +113,7 @@ gitLister <- function(paff = "."){
 #' @importFrom dplyr filter pull %>%
 #' @importFrom purrr map discard map_lgl map_chr
 #' @importFrom stringr str_split str_extract str_squish
+
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_nodes html_text
 libraryFinder <- function(parentFolder, howLong = 365, whatLib =.libPaths()[1]){
@@ -195,11 +196,14 @@ pleaseForTheLoveOfGodLetMeBuild <- function(paff = ".."){
     purrr::map(~unlink(., recursive = TRUE))
 }
 
-#' @title Identify which folders are git repos, runs `gc` on  git folders, and analyzes.
+#' @title Identify which folders are git repos, clean them up and organize them. READ WARNING IN DESCRIPTION
 #' @description This function will output a dataframe that will state whether folders
 #' within a specified folder are git repos, and their status. By status I mean,
 #' what's the currently checked-out branch, whether
 #' there are any changes noticed between the local repo and the remote.
+#' CAREFUL!!!!!!!!!!!!!!!!!!!!!!!!!!
+#' This command will also run gc, delete local merged branches and prune your remote
+#' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #' @param matchingText PARAM_DESCRIPTION, Default: '.'
 #' @param paff path to the file, Default: '..'
 #' @return will return a dataframe with the following fields: name,gitRepo (T/F),
@@ -216,10 +220,6 @@ pleaseForTheLoveOfGodLetMeBuild <- function(paff = ".."){
 #'  #EXAMPLE1
 #'  }
 #' }
-#' @seealso
-#'  \code{\link[purrr]{map}}
-#'  \code{\link[tibble]{tibble}}
-#'  \code{\link[dplyr]{mutate}}
 #' @rdname gitOrganizer
 #' @export
 #' @importFrom purrr map
@@ -229,17 +229,18 @@ pleaseForTheLoveOfGodLetMeBuild <- function(paff = ".."){
 gitOrganizer <- function(paff = "..", matchingText = "."){
   ## Run garbage collection on all repos:
   repos <- list.files(paff, pattern = matchingText)
+  stuff <- 'git gc && git branch --merged | egrep -v \"(^\\*|master|dev)\" | xargs git branch -d && git remote prune origin\n\n'
   gc <- repos %>%
-    purrr::map(~system(paste0('cd .. && cd "./', ., '" && git gc')))
-
+    purrr::map(~system(paste0('cd .. && cd "./', ., '" && ', stuff)))
+  
   ## Which repos have never been added to github:
   gitOrNot <- tibble::tibble(name = repos, gitRepo = gc %>% as.character) %>%
     dplyr::mutate(gitRepo = ifelse(gitRepo == 0, TRUE, FALSE))
-
+  
   ## Gather the status of each of these github repos
   gitstatus <- repos %>%
     map(~system(paste0('cd .. && cd "./', ., '" && git status'), intern = TRUE))
-
+  
   ## clean up output
   gitstatus <- tibble(name = repos, result = gitstatus) %>% unnest(result) %>%
     filter(!grepl("fatal", result)) %>%
@@ -262,13 +263,13 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
       toCommit == "nothing to commit, working tree clean" ~ "OK",
       grepl("Changes not staged for commit", toCommit) ~ "Unstaged",
       grepl("	is behind", toCommit) ~ NA_character_,
-
+      
       TRUE ~ toCommit
     ))
-
+  
   ## merge w/ gitstatus
   finalDF <- full_join(gitOrNot, gitstatus, by = "name") %>% arrange(name)
-
+  
   ## cat out some quick analysis:
   finalDF %>% filter(!gitRepo) %>% pull(name) %>% paste(collapse = '\n\t\t') %>%
     cat("\n\nThese folders are NOT git repos: ", "\n\t\t",.)
