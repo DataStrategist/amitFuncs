@@ -229,7 +229,7 @@ pleaseForTheLoveOfGodLetMeBuild <- function(paff = ".."){
 gitOrganizer <- function(paff = "..", matchingText = "."){
   ## Run garbage collection on all repos:
   repos <- list.files(paff, pattern = matchingText)
-  stuff <- 'git gc && git branch --merged | egrep -v \"(^\\*|master|dev)\" | xargs git branch -d && git remote prune origin\n\n'
+  stuff <- 'git gc && git remote prune origin && git branch --merged | egrep -v \"(^\\*|master|dev)\" | xargs git branch -d'
   gc <- repos %>%
     purrr::map(~system(paste0('cd .. && cd "./', ., '" && ', stuff)))
   
