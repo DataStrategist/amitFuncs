@@ -2,7 +2,7 @@
 % Please edit documentation in R/funcs.R
 \name{gitOrganizer}
 \alias{gitOrganizer}
-\title{Identify which folders are git repos, runs `gc` on  git folders, and analyzes.}
+\title{Identify which folders are git repos, clean them up and organize them. READ WARNING IN DESCRIPTION}
 \usage{
 gitOrganizer(paff = "..", matchingText = ".")
 }
@@ -25,6 +25,9 @@ This function will output a dataframe that will state whether folders
 within a specified folder are git repos, and their status. By status I mean,
 what's the currently checked-out branch, whether
 there are any changes noticed between the local repo and the remote.
+CAREFUL!!!!!!!!!!!!!!!!!!!!!!!!!!
+This command will also run gc, delete local merged branches and prune your remote
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 \details{
 DETAILS
@@ -35,9 +38,4 @@ if(interactive()){
  #EXAMPLE1
  }
 }
-}
-\seealso{
-\code{\link[purrr]{map}}
- \code{\link[tibble]{tibble}}
- \code{\link[dplyr]{mutate}}
 }

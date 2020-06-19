@@ -232,15 +232,15 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
   stuff <- 'git gc && git remote prune origin && git branch --merged | egrep -v \"(^\\*|master|dev)\" | xargs git branch -d'
   gc <- repos %>%
     purrr::map(~system(paste0('cd .. && cd "./', ., '" && ', stuff)))
-  
+
   ## Which repos have never been added to github:
   gitOrNot <- tibble::tibble(name = repos, gitRepo = gc %>% as.character) %>%
     dplyr::mutate(gitRepo = ifelse(gitRepo == 0, TRUE, FALSE))
-  
+
   ## Gather the status of each of these github repos
   gitstatus <- repos %>%
     map(~system(paste0('cd .. && cd "./', ., '" && git status'), intern = TRUE))
-  
+
   ## clean up output
   gitstatus <- tibble(name = repos, result = gitstatus) %>% unnest(result) %>%
     filter(!grepl("fatal", result)) %>%
@@ -263,13 +263,13 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
       toCommit == "nothing to commit, working tree clean" ~ "OK",
       grepl("Changes not staged for commit", toCommit) ~ "Unstaged",
       grepl("	is behind", toCommit) ~ NA_character_,
-      
+
       TRUE ~ toCommit
     ))
-  
+
   ## merge w/ gitstatus
   finalDF <- full_join(gitOrNot, gitstatus, by = "name") %>% arrange(name)
-  
+
   ## cat out some quick analysis:
   finalDF %>% filter(!gitRepo) %>% pull(name) %>% paste(collapse = '\n\t\t') %>%
     cat("\n\nThese folders are NOT git repos: ", "\n\t\t",.)
@@ -304,25 +304,36 @@ gitOrganizer <- function(paff = "..", matchingText = "."){
 #' @importFrom dplyr filter pull
 packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
   ## install packages (but make sure from above you're on master for all of them.)
-  toInstall <- list.files(paff, pattern = matchingText, full.names = FALSE)
+  allOfThem <- list.files(paff, pattern = matchingText, full.names = FALSE)
 
   ## if selected, filter down to master branch.
   if (onlyMaster) {
-    gitstatus <- toInstall %>% purrr::set_names() %>%
-      purrr::map(~system(paste0('cd ',paff,' && cd "./', ., '" && git status'), intern = TRUE))
+    if(as.character(Sys.info()[1]) == "Windows"){
+      gitstatus <- allOfThem %>% purrr::set_names() %>%
+        purrr::map(~shell(paste0('cd ',paff,' && cd "./', ., '" && git status'), intern = TRUE))
+    } else {
+      gitstatus <- allOfThem %>% purrr::set_names() %>%
+        purrr::map(~system(paste0('cd ',paff,' && cd "./', ., '" && git status'), intern = TRUE))
+    }
 
     allowed <- gitstatus %>% purrr::map(~head(., 1)) %>% tibble::enframe() %>%
-    tidyr::unnest(value) %>% dplyr::filter(grepl("master", value)) %>%
+      tidyr::unnest(value) %>% dplyr::filter(grepl("master", value)) %>%
       dplyr::pull(name)
-
-    toInstall <- allowed
+  } else {
+    allowed <- allOfThem
   }
 
-  Installer <- toInstall %>% set_names %>%
-    purrr::map(~purrr::safely(system)(paste0('R CMD INSTALL ', paff, '/', .), intern = TRUE))
+  instaaa <- function(x){
+    # browser()
+    system(paste0('R CMD INSTALL ', paff, '/', x), intern = TRUE)
+    print(paste0(x, " done!"))
+  }
+
+  Installer <- allowed %>% set_names %>%
+    purrr::map(~safely(instaaa(.)))
   # browser()
 
-  Installer %>% map("result") %>% enframe %>% unnest(value)
+  Installer
 }
 
 
