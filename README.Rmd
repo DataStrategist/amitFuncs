@@ -1,6 +1,7 @@
 ---
 output: github_document
 ---
+![CI](https://github.com/DataStrategist/amitFuncs/workflows/CI/badge.svg?branch=master)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
