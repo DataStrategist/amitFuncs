@@ -16,7 +16,7 @@ OUTPUT_DESCRIPTION
 }
 \description{
 This function is suitable to identify what exports are required when
-designing a package
+designing a package. Like a catch all in case sinew fails.
 }
 \details{
 DETAILS
@@ -27,8 +27,4 @@ if(interactive()){
  #EXAMPLE1
  }
 }
-}
-\seealso{
-\code{\link[tibble]{tibble}}
- \code{\link[tidyr]{fill}}
 }

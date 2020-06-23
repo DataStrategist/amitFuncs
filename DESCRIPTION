@@ -1,7 +1,7 @@
 Package: amitFuncs
 Type: Package
 Title: Random Assortment Of Convenience Functions By Amit
-Version: 0.24
+Version: 0.25
 Authors@R: person(given = "Amit", family = "Kohli",
            role = c("aut", "cre"),
            email = "mexindian@gmail.com")
@@ -21,3 +21,10 @@ Imports:
     tidyr,
     xml2,
     readr
+Suggests: 
+    testthat,
+    roxytest
+Roxygen: list(roclets = c("namespace", "rd", 
+                          "roxytest::testthat_roclet",
+                          "roxytest::return_roclet",
+                          "roxytest::examples_roclet"))

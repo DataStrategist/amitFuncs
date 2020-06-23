@@ -30,6 +30,3 @@ if(interactive()){
  }
 }
 }
-\seealso{
-\code{\link[purrr]{map}}
-}
