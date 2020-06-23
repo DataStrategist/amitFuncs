@@ -534,7 +534,7 @@ edgeListToNodesEdges <- function(df,Index=1){
 #' @rdname testMatrixMaker
 #' @export
 #' @importFrom tibble tibble
-#' @importFrom tidyr fill
+#' @importFrom tidyr fill unite
 #' @importFrom readr read_lines
 testMatrixMaker <- function(){
   ## read all files in selected folder
@@ -569,7 +569,7 @@ testMatrixMaker <- function(){
   expect_error() or expect_equal()\n\n
   Once that's done, put them in your @tests roxytest block\n\n
   for more information, please see: \n
-  https://mikldk.github.io/roxytest/articles/introduction.html"
+  https://mikldk.github.io/roxytest/articles/introduction.html\n\n"
   cat(text, output)
 }
 
