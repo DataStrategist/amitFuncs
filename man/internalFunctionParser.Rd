@@ -2,12 +2,12 @@
 % Please edit documentation in R/funcs.R
 \name{internalFunctionParser}
 \alias{internalFunctionParser}
-\title{FUNCTION_TITLE}
+\title{this does most of the heavy lifting of seperating inputs and functions}
 \usage{
 internalFunctionParser(textString)
 }
 \arguments{
-\item{textString}{PARAM_DESCRIPTION}
+\item{textString}{what item should I break down}
 }
 \value{
 OUTPUT_DESCRIPTION

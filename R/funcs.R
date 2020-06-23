@@ -603,9 +603,9 @@ joiner <- function(df){
     select(-rowname)
 }
 
-#' @title FUNCTION_TITLE
+#' @title this does most of the heavy lifting of seperating inputs and functions
 #' @description FUNCTION_DESCRIPTION
-#' @param textString PARAM_DESCRIPTION
+#' @param textString what item should I break down
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
