@@ -4,6 +4,8 @@
 #' @param num_char how many characters should be returned
 #' @return the `num_char` length of chars on the left of the inputed string
 #' @details DETAILS
+#' @tests
+#' expect_equal(bar("A", "B"), paste("A", "B", sep = "/"))
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -12,6 +14,9 @@
 #' }
 #' @rdname left
 #' @export
+
+# text stuff --------------------------------------------------------------
+
 
 left <- function(text, num_char) {
   substr(text, 1, num_char)
@@ -56,7 +61,7 @@ right <- function(text, num_char) {
   substr(text, nchar(text) - (num_char-1), nchar(text))
 }
 
-# Git finder --------------------------------------------------------------
+# package stuff --------------------------------------------------------------
 
 #' @title figure out which folders have git initialized or not
 #' @description FUNCTION_DESCRIPTION
@@ -180,8 +185,7 @@ install.packages(c("', CRANstuff,  '"), lib = "', whatLib, '")'))
 #'  #EXAMPLE1
 #'  }
 #' }
-#' @seealso
-#'  \code{\link[purrr]{map}}
+
 #' @rdname pleaseForTheLoveOfGodLetMeBuild
 #' @export
 #' @importFrom purrr map
@@ -339,7 +343,7 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
 
 #' @title find functions used in each of the functions in a speficied R file
 #' @description This function is suitable to identify what exports are required when
-#' designing a package
+#' designing a package. Like a catch all in case sinew fails.
 #' @param paff path to the file, Default: 'R'
 #' @param matchingText PARAM_DESCRIPTION, Default: '.'
 #' @return OUTPUT_DESCRIPTION
@@ -350,9 +354,6 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
 #'  #EXAMPLE1
 #'  }
 #' }
-#' @seealso
-#'  \code{\link[tibble]{tibble}}
-#'  \code{\link[tidyr]{fill}}
 #' @rdname functionsUsedFinder
 #' @export
 #' @importFrom tibble tibble
@@ -384,56 +385,6 @@ functionsUsedFinder <- function(paff = "R", matchingText = "."){
     unique()
 
   return(output)
-}
-
-
-
-
-# network -----------------------------------------------------------------
-
-
-#' @title convert an edge list into 2 data frames: nodes and edges
-#' @description This function takes a data.frame like with two or three columns:
-#' `FROM` and `TO` (and potentially `VALUE`) and outputs a list containing two
-#' dataframes: Nodes and Edges. The simplest way to accomplish this task would be to
-#' create an edge list using the igraph function `igraph::from_edgelist()`, and then
-#' subsequently we could use `igraph::as_data_frame()` to create each data.frame.
-#' This function provides some additional functionality for convenience for the
-#' extremely lazy, suitable for subsequent manipulation
-#'
-#' @param df dataframe with edgeList
-#' @param Index Should the IDs of nodes start from 0 or 1. The indexing is important.
-#' By default, the edges will be 1-indexed (for VisNetwork), but if you're using
-#' network3d, change the indexing to 0, Default: 1
-#' @return output will be a list containing both dataframes
-#' @details nothin
-#' @importFrom dplyr pull
-#' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
-#' }
-#' @rdname edgeListToNodesEdges
-#' @export
-
-edgeListToNodesEdges <- function(df,Index=1){
-  nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
-  nodes[,1] <- as.character(nodes[,1])
-  nodes$id <- 1:nrow(nodes)
-
-  ## and match to IDs to make edges
-  edges <- data.frame(from= match(dplyr::pull(df[,1]),nodes$name),
-                      to=   match(pull(df[,2]),nodes$name),
-                      stringsAsFactors = FALSE)
-  if (ncol(df) == 3) edges$value=df[,3]
-
-  ## indexing
-  if (Index==0){
-    edges$from <- as.integer(edges$from - 1)
-    edges$to <- as.integer(edges$to - 1)
-  }
-  list(nodes=nodes,edges=edges)
 }
 
 
@@ -508,6 +459,187 @@ amitFuncs::pleaseForTheLoveOfGodLetMeBuild()
 usethis::use_dev_version()
 use_vignette()'
 
-cat(txt)
+  cat(txt)
 
+}
+
+
+
+
+# network stuff -----------------------------------------------------------
+
+#' @title convert an edge list into 2 data frames: nodes and edges
+#' @description This function takes a data.frame like with two or three columns:
+#' `FROM` and `TO` (and potentially `VALUE`) and outputs a list containing two
+#' dataframes: Nodes and Edges. The simplest way to accomplish this task would be to
+#' create an edge list using the igraph function `igraph::from_edgelist()`, and then
+#' subsequently we could use `igraph::as_data_frame()` to create each data.frame.
+#' This function provides some additional functionality for convenience for the
+#' extremely lazy, suitable for subsequent manipulation
+#'
+#' @param df dataframe with edgeList
+#' @param Index Should the IDs of nodes start from 0 or 1. The indexing is important.
+#' By default, the edges will be 1-indexed (for VisNetwork), but if you're using
+#' network3d, change the indexing to 0, Default: 1
+#' @return output will be a list containing both dataframes
+#' @details nothin
+#' @importFrom dplyr pull
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname edgeListToNodesEdges
+#' @export
+
+edgeListToNodesEdges <- function(df,Index=1){
+  nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
+  nodes[,1] <- as.character(nodes[,1])
+  nodes$id <- 1:nrow(nodes)
+
+  ## and match to IDs to make edges
+  edges <- data.frame(from= match(dplyr::pull(df[,1]),nodes$name),
+                      to=   match(pull(df[,2]),nodes$name),
+                      stringsAsFactors = FALSE)
+  if (ncol(df) == 3) edges$value=df[,3]
+
+  ## indexing
+  if (Index==0){
+    edges$from <- as.integer(edges$from - 1)
+    edges$to <- as.integer(edges$to - 1)
   }
+  list(nodes=nodes,edges=edges)
+}
+
+
+# testing stuff -----------------------------------------------------------
+#' @title Create proposals for a testing matrix
+#' @description Will go through all the R files in a package,
+#' looking for instances of `testFrom` on roxygen2 `param` values in
+#' function definitions. Once it finds these, it'll expand a grid of
+#' all possibilities. This will provide a shortlist of all options to test
+#' the code with, although it will not know if the input combination should
+#' fail or pass, and if it does pass it should have a certain value.
+#' @return will dump out a character vector of expressions suitable to
+#' be paired with their testthat expectations.
+#' @details This function is a bit brittle for now. It assumes that the
+#' `testFrom` placement will be the last thing on param lines.
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname testMatrixMaker
+#' @export
+#' @importFrom tibble tibble
+#' @importFrom tidyr fill
+#' @importFrom readr read_lines
+testMatrixMaker <- function(){
+  ## read all files in selected folder
+  a <- list.files("./R", full.names = TRUE) %>%
+    purrr::map(read_lines) %>% unlist()
+
+  ## keep params and function definition
+  mainFrame <- a %>% purrr::keep(~grepl("@param|function\\(", .x)) %>%
+    tibble::tibble(param = .) %>%
+    dplyr::mutate(funct = ifelse(grepl("function",param),
+                                 gsub(" ?<- ?function|\\{", "",param), NA)) %>%
+    fill(funct,.direction = "up") %>%
+    ##remove functs
+    filter(grepl("#", param)) %>%
+    split(.$funct) %>%
+    map(~pull(., param))
+
+  parsed <- mainFrame %>% map(internalFunctionParser)
+
+  output <- parsed %>%
+    map(joiner) %>% enframe %>% unnest(value) %>%
+    mutate(name = gsub("(?<=\\().+", "", name, perl = TRUE)) %>%
+    mutate(finisher = ")") %>%
+    unite(., ., sep = ", ") %>% pull %>%
+    gsub(", NA", "", .) %>%
+    gsub("\\(, ?", "\\(", .) %>%
+    gsub(", ?\\)", "\\)\n", .) %>% noquote()
+
+  text <- "OK, these are all the outputs you requested!\n\n
+  All you have to do put your testthat expectation on:\n\n
+  Some options for example might be:
+  expect_error() or expect_equal()\n\n
+  Once that's done, put them in your @tests roxytest block\n\n
+  for more information, please see: \n
+  https://mikldk.github.io/roxytest/articles/introduction.html"
+  cat(text, output)
+}
+
+#' @title internal function for testMatrixMaker
+#' @description starts operationalizing the equality of the params
+#' @param df dataframe representing each function to be parsed
+#' @return gives a df but with variables nicely labelled
+#' @details this is probably not necessary, but in the off chance that
+#' parameters are listed in roxygen in a different order than they are
+#' listed in the function definition itself, it's safest to be super
+#' explicit. This also makes mapping here and there easier.
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname joiner
+#' @importFrom tidyr pivot_longer pivot_wider
+#' @importFrom tibble rownames_to_column
+#' @importFrom dplyr %>% mutate select
+
+joiner <- function(df){
+  df %>%
+    rownames_to_column() %>%
+    pivot_longer(cols = -rowname, names_to = "nam",
+                 values_to = "val") %>%
+    mutate(boff = paste(nam, val, sep = " = ")) %>%
+    pivot_wider(id_cols = rowname, names_from = nam,
+                values_from = boff) %>%
+    select(-rowname)
+}
+
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param textString PARAM_DESCRIPTION
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname internalFunctionParser
+#' @importFrom purrr keep map set_names
+#' @importFrom tibble tibble as_tibble
+#' @importFrom dplyr mutate %>% filter select pull
+#' @importFrom stringr str_split
+#' @importFrom tidyr unnest fill
+internalFunctionParser <- function(textString){
+  ## keep params and function definition
+  mainFrame <- textString %>% purrr::keep(~grepl("@param|function\\(", .x)) %>%
+    tibble::tibble(param = .) %>%
+    dplyr::mutate(funct = ifelse(grepl("function",param),
+                                 gsub(" ?<- ?function|\\{", "",param), NA)) %>%
+    fill(funct,.direction = "up") %>%
+    ##remove functs
+    filter(grepl("#", param))
+
+  ## extract param and test options
+  paramAndOptions <- mainFrame %>% select(param) %>%
+    mutate(param= gsub(".+param ", "", param)) %>% pull %>%
+    str_split(., " .+testFrom: ?", simplify = TRUE) %>%
+    as.data.frame(stringsAsFactors = FALSE) %>%
+    set_names(c("field", "options")) %>%
+    as_tibble
+
+  paramAndOptions$options <- str_split(paramAndOptions$options, ",")
+
+  paramAndOptions %>% unnest(options) %>% split(.$field) %>%
+    map(~pull(.)) %>% expand.grid
+}
