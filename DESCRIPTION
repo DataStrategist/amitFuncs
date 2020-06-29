@@ -1,7 +1,7 @@
 Package: amitFuncs
 Type: Package
 Title: Random Assortment Of Convenience Functions By Amit
-Version: 0.25
+Version: 0.26
 Authors@R: person(given = "Amit", family = "Kohli",
            role = c("aut", "cre"),
            email = "mexindian@gmail.com")

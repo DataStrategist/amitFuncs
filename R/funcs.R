@@ -5,7 +5,7 @@
 #' @return the `num_char` length of chars on the left of the inputed string
 #' @details DETAILS
 #' @tests
-#' expect_equal(bar("A", "B"), paste("A", "B", sep = "/"))
+#' testthat::expect_equal(left("ABC", 2), "AB")
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -642,4 +642,61 @@ internalFunctionParser <- function(textString){
 
   paramAndOptions %>% unnest(options) %>% split(.$field) %>%
     map(~pull(.)) %>% expand.grid
+}
+
+
+#' @title Given a text with titles, it returns a df with each line with it's accompanying title
+#' @description This is suitable for when you have a long text and you're trying to do some NLP on it.
+#' Some examples might be: trying to digest documentation, analyzing documentation, converting to a table
+#' format something that should have never been entered into word, etc.
+#' @param text the character string containing everything you're looking for.
+#' @param titleChar what unique character denotes a title?
+#' @return returns a data frame with the erstwhile titles pushed into each row
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
+#'  titleFlattener(text, "##")
+#'  }
+#' }
+#' @rdname titleFlattener
+#' @export
+#' @importFrom dplyr mutate filter %>%
+#' @importFrom tidyr fill
+titleFlattener <- function(text, titleChar){
+  df <- data.frame(stuff = text, stringsAsFactors = FALSE)
+  df <- df %>% dplyr::mutate(title = ifelse(grepl(titleChar, text), stuff, NA)) %>%
+    tidyr::fill(title) %>%
+    dplyr::filter(stuff != title) %>%
+    select(title, stuff)
+  return(df)
+}
+
+#' @title given a df with two columns, stuff and section headers,
+#' it outputs the stuff where with section headers are "titles"
+#' @description basically this is the opposite of titleFlattener
+#' @param textdf the df with the text and the section headers
+#' @param spaceAbove should there be a line before the sections, Default: TRUE
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
+#'  titleUnflattener(titleFlattener(text, "##"))
+#'  }
+#' }
+#' @rdname titleUnflattener
+#' @export
+#' @importFrom dplyr %>%
+titleUnflattener <- function(textdf, spaceAbove = TRUE){
+  ## maybe add title space before title
+  if(spaceAbove) textdf$title <- paste("\n",textdf$title)
+
+  ## Now parse it out
+  res <- split(x$stuff, x$title)
+  unlist(mapply(c, names(res), res), use.names = FALSE) %>% cat(sep = "\n")
 }
