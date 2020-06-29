@@ -697,6 +697,6 @@ titleUnflattener <- function(textdf, spaceAbove = TRUE){
   if(spaceAbove) textdf$title <- paste("\n",textdf$title)
 
   ## Now parse it out
-  res <- split(x$stuff, x$title)
+  res <- split(textdf$stuff, textdf$title)
   unlist(mapply(c, names(res), res), use.names = FALSE) %>% cat(sep = "\n")
 }
