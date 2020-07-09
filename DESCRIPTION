@@ -1,7 +1,7 @@
 Package: amitFuncs
 Type: Package
 Title: Random Assortment Of Convenience Functions By Amit
-Version: 0.26
+Version: 0.27
 Authors@R: person(given = "Amit", family = "Kohli",
            role = c("aut", "cre"),
            email = "mexindian@gmail.com")
@@ -9,7 +9,7 @@ Description: So I'm fairly lazy and there's many small things that should be eas
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 URL: https://github.com/DataStrategist/amitFuncs
 BugReports: https://github.com/DataStrategist/amitFuncs/issues
 Imports: 
@@ -25,6 +25,7 @@ Suggests:
     testthat,
     roxytest
 Roxygen: list(roclets = c("namespace", "rd", 
+                          "roxytest::param_roclet",
                           "roxytest::testthat_roclet",
                           "roxytest::return_roclet",
                           "roxytest::examples_roclet"))
