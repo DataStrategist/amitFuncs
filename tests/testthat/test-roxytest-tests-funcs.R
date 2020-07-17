@@ -3,6 +3,6 @@
 context("File R/funcs.R: @tests")
 
 test_that("Function left() @ L21", {
-  expect_equal(bar("A", "B"), paste("A", "B", sep = "/"))
+  testthat::expect_equal(left("ABC", 2), "AB")
 })
 
