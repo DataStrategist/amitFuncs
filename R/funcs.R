@@ -713,7 +713,11 @@ titleUnflattener <- function(textdf, spaceAbove = TRUE){
 #'   just to help save time. Assumes the tidyverse is loaded
 #' @param objectName what is the name of the list IN QUOTES that you're going to
 #'   be mapping? Eg "iris" not iris
-#' @return returns nothing, but will output some text to the console suitable to be copied into your script
+#' @param parallel if your list contains many entries, set this to TRUE in order
+#'   to use multiple cores. If setting to TRUE gives an error, install the
+#'   package furrr
+#' @return returns nothing, but will output some text to the console suitable to
+#'   be copied into your script
 #' @details
 #' @examples
 #' \dontrun{
@@ -724,34 +728,42 @@ titleUnflattener <- function(textdf, spaceAbove = TRUE){
 #' @rdname mapHelper
 #' @export
 
-mapHelper <- function(objectName){
+mapHelper <- function(objectName, parallel = FALSE){
+
+    if (!parallel){
+      mapCommand <- paste0('mapResult <- ', objectName, ' %>% set_names %>% map(~safely(throwawayFunction1)(.))')
+    } else {
+      mapCommand <- paste0('mapResult <- ', objectName, ' %>% set_names %>% furrr::future_map(~safely(throwawayFunction1)(.))')
+    }
   cat(paste0('
   ########### PASTE ME INTO YOUR SCRIPT AND WORK ON ME!! ##########
 
 ### map helper
 ## Example: pick one entry of your list and show what will happen
-## Ex. ', objectName, '[[15]] %>% mutate(inArea = D_Name %in% D_Interested)
+## Ex. ', objectName, '[[5]] %>% mutate(inArea = D_Name %in% D_Interested)
 
 
-## make function using example from 1
+## write the throwaway function that will be mapped to each entry of ', objectName, '
 throwawayFunction1 <- function(item){
-  ## Ex. item %>% mutate(inArea = D_Name %in% D_Interested)
+  item %>%
+  ## put your code below:
+  ## Ex. mutate(inArea = D_Name %in% D_Interested)
+
 
 }
 
 ## test function:
-## Ex. throwawayFunction1(', objectName, '[[15]])
+throwawayFunction1(', objectName, '[[5]])
 
 ## slow:
-## Ex. ', objectName, ' %>% set_names %>% head(3) %>% map(~throwawayFunction1(.))
+', objectName, ' %>% set_names %>% head(3) %>% map(~throwawayFunction1(.))
 
-## apply: choose one or the other, for small lists, map, for bigger lists future_map
-mapResult <- ', objectName, ' %>% set_names %>% map(~safely(throwawayFunction1)(.))
-mapResult <- ', objectName, ' %>% set_names %>% furrr::future_map(~safely(throwawayFunction1)(.))
+## apply the function to the list
+', mapCommand, '
 
-##output errors
+## check for errors
 mapResult %>% map("error") %>% map(as.character) %>% enframe %>% unnest(value)
 
-## keep results
+## keep results (rename goodStuff to whatever your desired outputname should be)
 goodStuff <- mapResult %>% map("result")'))
 }

@@ -5,14 +5,19 @@
 \title{A helper function to remember all the steps I like when mapping a
   throwaway function on somethin}
 \usage{
-mapHelper(objectName)
+mapHelper(objectName, parallel = FALSE)
 }
 \arguments{
 \item{objectName}{what is the name of the list IN QUOTES that you're going to
 be mapping? Eg "iris" not iris}
+
+\item{parallel}{if your list contains many entries, set this to TRUE in order
+to use multiple cores. If setting to TRUE gives an error, install the
+package furrr}
 }
 \value{
-returns nothing, but will output some text to the console suitable to be copied into your script
+returns nothing, but will output some text to the console suitable to
+  be copied into your script
 }
 \description{
 I always forget to set_names, to run safely, etc... so this is
