@@ -481,9 +481,11 @@ use_vignette()'
 #' @param Index Should the IDs of nodes start from 0 or 1. The indexing is important.
 #' By default, the edges will be 1-indexed (for VisNetwork), but if you're using
 #' network3d, change the indexing to 0, Default: 1
+#' @addLabel should the node names be displayed?
+#' @addHover should the node names be displayed on hover?
 #' @return output will be a list containing both dataframes
 #' @details nothin
-#' @importFrom dplyr pull
+#' @importFrom dplyr pull mutate
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -493,7 +495,7 @@ use_vignette()'
 #' @rdname edgeListToNodesEdges
 #' @export
 
-edgeListToNodesEdges <- function(df,Index=1){
+edgeListToNodesEdges <- function(df,addLabel = TRUE, addHover = FALSE, Index=1){
   nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
   nodes[,1] <- as.character(nodes[,1])
   nodes$id <- 1:nrow(nodes)
@@ -502,13 +504,16 @@ edgeListToNodesEdges <- function(df,Index=1){
   edges <- data.frame(from= match(dplyr::pull(df[,1]),nodes$name),
                       to=   match(pull(df[,2]),nodes$name),
                       stringsAsFactors = FALSE)
-  if (ncol(df) == 3) edges$value=df[,3]
+  if (ncol(df) == 3) edges <- edges %>% mutate(value = pull(df,3))
 
   ## indexing
   if (Index==0){
     edges$from <- as.integer(edges$from - 1)
     edges$to <- as.integer(edges$to - 1)
   }
+
+  if (addLabel) nodes$label <- nodes$name
+  if (addHover) nodes$title <- nodes$name
   list(nodes=nodes,edges=edges)
 }
 
@@ -699,4 +704,54 @@ titleUnflattener <- function(textdf, spaceAbove = TRUE){
   ## Now parse it out
   res <- split(textdf$stuff, textdf$title)
   unlist(mapply(c, names(res), res), use.names = FALSE) %>% cat(sep = "\n")
+}
+
+
+#' @title A helper function to remember all the steps I like when mapping a
+#'   throwaway function on somethin
+#' @description I always forget to set_names, to run safely, etc... so this is
+#'   just to help save time. Assumes the tidyverse is loaded
+#' @param objectName what is the name of the list IN QUOTES that you're going to
+#'   be mapping? Eg "iris" not iris
+#' @return returns nothing, but will output some text to the console suitable to be copied into your script
+#' @details
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  goodstuff("iris")
+#'  }
+#' }
+#' @rdname mapHelper
+#' @export
+
+mapHelper <- function(objectName){
+  cat(paste0('
+  ########### PASTE ME INTO YOUR SCRIPT AND WORK ON ME!! ##########
+
+### map helper
+## Example: pick one entry of your list and show what will happen
+## Ex. ', objectName, '[[15]] %>% mutate(inArea = D_Name %in% D_Interested)
+
+
+## make function using example from 1
+throwawayFunction1 <- function(item){
+  ## Ex. item %>% mutate(inArea = D_Name %in% D_Interested)
+
+}
+
+## test function:
+## Ex. throwawayFunction1(', objectName, '[[15]])
+
+## slow:
+## Ex. ', objectName, ' %>% set_names %>% head(3) %>% map(~throwawayFunction1(.))
+
+## apply: choose one or the other, for small lists, map, for bigger lists future_map
+mapResult <- ', objectName, ' %>% set_names %>% map(~safely(throwawayFunction1)(.))
+mapResult <- ', objectName, ' %>% set_names %>% furrr::future_map(~safely(throwawayFunction1)(.))
+
+##output errors
+mapResult %>% map("error") %>% map(as.character) %>% enframe %>% unnest(value)
+
+## keep results
+goodStuff <- mapResult %>% map("result")'))
 }

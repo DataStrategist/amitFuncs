@@ -4,7 +4,7 @@
 \alias{edgeListToNodesEdges}
 \title{convert an edge list into 2 data frames: nodes and edges}
 \usage{
-edgeListToNodesEdges(df, Index = 1)
+edgeListToNodesEdges(df, addLabel = TRUE, addHover = FALSE, Index = 1)
 }
 \arguments{
 \item{df}{dataframe with edgeList}
