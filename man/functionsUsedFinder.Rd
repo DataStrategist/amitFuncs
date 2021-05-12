@@ -2,7 +2,7 @@
 % Please edit documentation in R/funcs.R
 \name{functionsUsedFinder}
 \alias{functionsUsedFinder}
-\title{find functions used in each of the functions in a speficied R file}
+\title{find functions used in each of the functions in a specified R file}
 \usage{
 functionsUsedFinder(paff = "R", matchingText = ".")
 }

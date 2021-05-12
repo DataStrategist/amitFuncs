@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser • amitFuncs</title>
+<title>Create a prettier igraph chart — igraphPlot • amitFuncs</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser" />
+<meta property="og:title" content="Create a prettier igraph chart — igraphPlot" />
 <meta property="og:description" content="FUNCTION_DESCRIPTION" />
 
 
@@ -108,23 +108,60 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>this does most of the heavy lifting of seperating inputs and functions</h1>
+    <h1>Create a prettier igraph chart</h1>
     <small class="dont-index">Source: <a href='https://github.com/DataStrategist/amitFuncs/blob/master/R/funcs.R'><code>R/funcs.R</code></a></small>
-    <div class="hidden name"><code>internalFunctionParser.Rd</code></div>
+    <div class="hidden name"><code>igraphPlot.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>FUNCTION_DESCRIPTION</p>
     </div>
 
-    <pre class="usage"><span class='fu'>internalFunctionParser</span>(<span class='no'>textString</span>)</pre>
+    <pre class="usage"><span class='fu'>igraphPlot</span>(
+  <span class='no'>g</span>,
+  <span class='kw'>size</span> <span class='kw'>=</span> <span class='st'>"D"</span>,
+  <span class='kw'>color</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>layout</span> <span class='kw'>=</span> <span class='st'>"FR"</span>,
+  <span class='kw'>nodeScale</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+  <span class='kw'>as</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
+  <span class='kw'>keepBackbone</span> <span class='kw'>=</span> <span class='fl'>0.5</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>textString</th>
-      <td><p>what item should I break down</p></td>
+      <th>g</th>
+      <td><p>graph from igraph</p></td>
+    </tr>
+    <tr>
+      <th>size</th>
+      <td><p>What should govern node sizes ('D' for Degree, , 'B' for Betweenness,
+'A' for Authority, 'H' for Hub, 'C' for Eigenvector Centrality), Default: 'D'</p></td>
+    </tr>
+    <tr>
+      <th>color</th>
+      <td><p>What should govern the node colors? Same options as size (D,B,A,H),
+Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>layout</th>
+      <td><p>What layout should be used ('FR' for Fruchterman Reingold, 'G' for
+Graphopt, 'K' for Kamada Kawai), Default: 'F'</p></td>
+    </tr>
+    <tr>
+      <th>nodeScale</th>
+      <td><p>how much should we exaggerate the scale for node sizes, Default: 2</p></td>
+    </tr>
+    <tr>
+      <th>as</th>
+      <td><p>Arrow head size, Default: 0.1</p></td>
+    </tr>
+    <tr>
+      <th>keepBackbone</th>
+      <td><p>What percent of edges should be shown? We are using the
+`layout_as_backbone` function from `graphlayouts` to trim less meaningful edges
+for aesthetic purposes, Default = 0.5</p></td>
     </tr>
     </table>
 
@@ -139,6 +176,7 @@
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 <span class='kw'>if</span>(<span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span>()){
  <span class='co'>#EXAMPLE1</span>
+
  }
 }</div></pre>
   </div>

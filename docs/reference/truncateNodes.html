@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser • amitFuncs</title>
+<title>filter a network according to simple node counts — truncateNodes • amitFuncs</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser" />
-<meta property="og:description" content="FUNCTION_DESCRIPTION" />
+<meta property="og:title" content="filter a network according to simple node counts — truncateNodes" />
+<meta property="og:description" content="This is a dangerous thing to do if you're interested in statistics,
+but for visualization purposes, it can be useful to make some decisions about what's
+being removed. For the purposes of this function, the count is the node's degrees." />
 
 
 
@@ -108,29 +110,48 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>this does most of the heavy lifting of seperating inputs and functions</h1>
+    <h1>filter a network according to simple node counts</h1>
     <small class="dont-index">Source: <a href='https://github.com/DataStrategist/amitFuncs/blob/master/R/funcs.R'><code>R/funcs.R</code></a></small>
-    <div class="hidden name"><code>internalFunctionParser.Rd</code></div>
+    <div class="hidden name"><code>truncateNodes.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>FUNCTION_DESCRIPTION</p>
+    <p>This is a dangerous thing to do if you're interested in statistics,
+but for visualization purposes, it can be useful to make some decisions about what's
+being removed. For the purposes of this function, the count is the node's degrees.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>internalFunctionParser</span>(<span class='no'>textString</span>)</pre>
+    <pre class="usage"><span class='fu'>truncateNodes</span>(
+  <span class='no'>object</span>,
+  <span class='kw'>eliminateAbove</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>eliminateBelow</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>printResults</span> <span class='kw'>=</span> <span class='no'>F</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>textString</th>
-      <td><p>what item should I break down</p></td>
+      <th>object</th>
+      <td><p>The list that contains nodes and edges, (the output of createNetwork)</p></td>
+    </tr>
+    <tr>
+      <th>eliminateAbove</th>
+      <td><p>nodes larger than this number will be omitted, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>eliminateBelow</th>
+      <td><p>nodes smaller than this number will be omitted, Default: NULL</p></td>
+    </tr>
+    <tr>
+      <th>printResults</th>
+      <td><p>View node degrees to help w/ trim limits?</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>OUTPUT_DESCRIPTION</p>
+    <p>a list with 3 objects, same structure as the input</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>DETAILS</p>

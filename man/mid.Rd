@@ -26,6 +26,7 @@ DETAILS
 \dontrun{
 if(interactive()){
  #EXAMPLE1
+ mid("ABCDE", 2, 1)
  }
 }
 }

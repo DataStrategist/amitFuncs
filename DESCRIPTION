@@ -1,7 +1,7 @@
 Package: amitFuncs
 Type: Package
 Title: Random Assortment Of Convenience Functions By Amit
-Version: 0.27
+Version: 0.30
 Authors@R: person(given = "Amit", family = "Kohli",
            role = c("aut", "cre"),
            email = "mexindian@gmail.com")
@@ -20,7 +20,9 @@ Imports:
     tibble,
     tidyr,
     xml2,
-    readr
+    readr,
+    igraph,
+    graphlayouts
 Suggests: 
     testthat,
     roxytest

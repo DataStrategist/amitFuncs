@@ -4,14 +4,32 @@
 \alias{edgeListToNodesEdges}
 \title{convert an edge list into 2 data frames: nodes and edges}
 \usage{
-edgeListToNodesEdges(df, addLabel = TRUE, addHover = FALSE, Index = 1)
+edgeListToNodesEdges(
+  df,
+  addLabel = TRUE,
+  addHover = FALSE,
+  col1 = "#A58FAA",
+  col2 = "#A6D6D6",
+  Index = 1,
+  printResults = F
+)
 }
 \arguments{
 \item{df}{dataframe with edgeList}
 
+\item{addLabel}{should the node names be displayed?}
+
+\item{addHover}{should the node names be displayed on hover?}
+
+\item{col1}{what color should from nodes be?, Default: #A58FAA}
+
+\item{col2}{what color should from nodes be?, Default: #A6D6D6}
+
 \item{Index}{Should the IDs of nodes start from 0 or 1. The indexing is important.
 By default, the edges will be 1-indexed (for VisNetwork), but if you're using
 network3d, change the indexing to 0, Default: 1}
+
+\item{printResults}{View node degrees to help w/ trim limits?}
 }
 \value{
 output will be a list containing both dataframes
@@ -20,8 +38,8 @@ output will be a list containing both dataframes
 This function takes a data.frame like with two or three columns:
 `FROM` and `TO` (and potentially `VALUE`) and outputs a list containing two
 dataframes: Nodes and Edges. The simplest way to accomplish this task would be to
-create an edge list using the igraph function `igraph::from_edgelist()`, and then
-subsequently we could use `igraph::as_data_frame()` to create each data.frame.
+create an edge list using the igraph function `from_edgelist()`, and then
+subsequently we could use `as_data_frame()` to create each data.frame.
 This function provides some additional functionality for convenience for the
 extremely lazy, suitable for subsequent manipulation
 }
@@ -31,6 +49,7 @@ nothin
 \examples{
 \dontrun{
 if(interactive()){
+g <-
  #EXAMPLE1
  }
 }

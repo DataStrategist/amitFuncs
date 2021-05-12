@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser • amitFuncs</title>
+<title>A helper function to remember all the steps I like when mapping a
+  throwaway function on somethin — mapHelper • amitFuncs</title>
 
 
 <!-- jquery -->
@@ -39,8 +40,10 @@
 
 
 
-<meta property="og:title" content="this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser" />
-<meta property="og:description" content="FUNCTION_DESCRIPTION" />
+<meta property="og:title" content="A helper function to remember all the steps I like when mapping a
+  throwaway function on somethin — mapHelper" />
+<meta property="og:description" content="I always forget to set_names, to run safely, etc... so this is
+  just to help save time. Assumes the tidyverse is loaded" />
 
 
 
@@ -108,37 +111,44 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>this does most of the heavy lifting of seperating inputs and functions</h1>
+    <h1>A helper function to remember all the steps I like when mapping a
+  throwaway function on somethin</h1>
     <small class="dont-index">Source: <a href='https://github.com/DataStrategist/amitFuncs/blob/master/R/funcs.R'><code>R/funcs.R</code></a></small>
-    <div class="hidden name"><code>internalFunctionParser.Rd</code></div>
+    <div class="hidden name"><code>mapHelper.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>FUNCTION_DESCRIPTION</p>
+    <p>I always forget to set_names, to run safely, etc... so this is
+  just to help save time. Assumes the tidyverse is loaded</p>
     </div>
 
-    <pre class="usage"><span class='fu'>internalFunctionParser</span>(<span class='no'>textString</span>)</pre>
+    <pre class="usage"><span class='fu'>mapHelper</span>(<span class='no'>objectName</span>, <span class='kw'>parallel</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>textString</th>
-      <td><p>what item should I break down</p></td>
+      <th>objectName</th>
+      <td><p>what is the name of the list IN QUOTES that you're going to
+be mapping? Eg "iris" not iris</p></td>
+    </tr>
+    <tr>
+      <th>parallel</th>
+      <td><p>if your list contains many entries, set this to TRUE in order
+to use multiple cores. If setting to TRUE gives an error, install the
+package furrr</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>OUTPUT_DESCRIPTION</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>DETAILS</p>
+    <p>returns nothing, but will output some text to the console suitable to
+  be copied into your script</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 <span class='kw'>if</span>(<span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span>()){
- <span class='co'>#EXAMPLE1</span>
+ <span class='fu'>goodstuff</span>(<span class='st'>"iris"</span>)
  }
 }</div></pre>
   </div>

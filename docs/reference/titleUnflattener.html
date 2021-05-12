@@ -6,7 +6,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser • amitFuncs</title>
+<title>given a df with two columns, stuff and section headers,
+it outputs the stuff where with section headers are "titles" — titleUnflattener • amitFuncs</title>
 
 
 <!-- jquery -->
@@ -39,8 +40,9 @@
 
 
 
-<meta property="og:title" content="this does most of the heavy lifting of seperating inputs and functions — internalFunctionParser" />
-<meta property="og:description" content="FUNCTION_DESCRIPTION" />
+<meta property="og:title" content="given a df with two columns, stuff and section headers,
+it outputs the stuff where with section headers are "titles" — titleUnflattener" />
+<meta property="og:description" content="basically this is the opposite of titleFlattener" />
 
 
 
@@ -108,23 +110,28 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>this does most of the heavy lifting of seperating inputs and functions</h1>
+    <h1>given a df with two columns, stuff and section headers,
+it outputs the stuff where with section headers are "titles"</h1>
     <small class="dont-index">Source: <a href='https://github.com/DataStrategist/amitFuncs/blob/master/R/funcs.R'><code>R/funcs.R</code></a></small>
-    <div class="hidden name"><code>internalFunctionParser.Rd</code></div>
+    <div class="hidden name"><code>titleUnflattener.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>FUNCTION_DESCRIPTION</p>
+    <p>basically this is the opposite of titleFlattener</p>
     </div>
 
-    <pre class="usage"><span class='fu'>internalFunctionParser</span>(<span class='no'>textString</span>)</pre>
+    <pre class="usage"><span class='fu'>titleUnflattener</span>(<span class='no'>textdf</span>, <span class='kw'>spaceAbove</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>textString</th>
-      <td><p>what item should I break down</p></td>
+      <th>textdf</th>
+      <td><p>the df with the text and the section headers</p></td>
+    </tr>
+    <tr>
+      <th>spaceAbove</th>
+      <td><p>should there be a line before the sections, Default: TRUE</p></td>
     </tr>
     </table>
 
@@ -139,6 +146,8 @@
     <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 <span class='kw'>if</span>(<span class='fu'><a href='https://rdrr.io/r/base/interactive.html'>interactive</a></span>()){
  <span class='co'>#EXAMPLE1</span>
+ <span class='no'>text</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"## First"</span>,<span class='st'>"one"</span>,<span class='st'>"however"</span>,<span class='st'>"two"</span>,<span class='st'>""</span>,<span class='st'>"## Second"</span>,<span class='st'>"otheer"</span>,<span class='st'>" - Happy"</span>,<span class='st'>"Thoughts"</span>)
+ <span class='fu'>titleUnflattener</span>(<span class='fu'><a href='titleFlattener.html'>titleFlattener</a></span>(<span class='no'>text</span>, <span class='st'>"##"</span>))
  }
 }</div></pre>
   </div>

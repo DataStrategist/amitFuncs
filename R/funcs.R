@@ -4,12 +4,12 @@
 #' @param num_char how many characters should be returned
 #' @return the `num_char` length of chars on the left of the inputed string
 #' @details DETAILS
-#' @tests
-#' testthat::expect_equal(left("ABC", 2), "AB")
+#' @tests testthat::expect_equal(left("ABC", 2), "AB")
 #' @examples
 #' \dontrun{
 #' if(interactive()){
 #'  #EXAMPLE1
+#'  left("ABC", 2)
 #'  }
 #' }
 #' @rdname left
@@ -27,12 +27,14 @@ left <- function(text, num_char) {
 #' @param text stuff to parse
 #' @param start_num PARAM_DESCRIPTION
 #' @param num_char how many characters should be returned
+#' @tests testthat::expect_equal(mid("ABCDE", 2, 1), "B")
 #' @return the `num_char` length of chars in the middle of the inputed string
 #' @details DETAILS
 #' @examples
 #' \dontrun{
 #' if(interactive()){
 #'  #EXAMPLE1
+#'  mid("ABCDE", 2, 1)
 #'  }
 #' }
 #' @rdname mid
@@ -46,12 +48,14 @@ mid <- function(text, start_num, num_char) {
 #' @description just like excel's right func
 #' @param text stuff to parse
 #' @param num_char how many characters should be returned
+#' @tests testthat::expect_equal(right("ABC", 2), "BC")
 #' @return the `num_char` length of chars on the right of the inputed string
 #' @details DETAILS
 #' @examples
 #' \dontrun{
 #' if(interactive()){
 #'  #EXAMPLE1
+#'  right("ABC", 2)
 #'  }
 #' }
 #' @rdname right
@@ -59,6 +63,61 @@ mid <- function(text, start_num, num_char) {
 
 right <- function(text, num_char) {
   substr(text, nchar(text) - (num_char-1), nchar(text))
+}
+
+#' @title Given a text with titles, it returns a df with each line with it's accompanying title
+#' @description This is suitable for when you have a long text and you're trying to do some NLP on it.
+#' Some examples might be: trying to digest documentation, analyzing documentation, converting to a table
+#' format something that should have never been entered into word, etc.
+#' @param text the character string containing everything you're looking for.
+#' @param titleChar what unique character denotes a title?
+#' @return returns a data frame with the erstwhile titles pushed into each row
+#' @details DETAILS
+#' @examples
+#'  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
+#'  titleFlattener(text, "##")
+#' @test
+#' text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
+#' a <- titleFlattener(text, "##")
+#' expect_equal(a[1,1], "## First")
+#' @rdname titleFlattener
+#' @export
+#' @importFrom dplyr mutate filter %>%
+#' @importFrom tidyr fill
+titleFlattener <- function(text, titleChar){
+  df <- data.frame(stuff = text, stringsAsFactors = FALSE)
+  df <- df %>% dplyr::mutate(title = ifelse(grepl(titleChar, text), stuff, NA)) %>%
+    tidyr::fill(title) %>%
+    dplyr::filter(stuff != title) %>%
+    select(title, stuff)
+  return(df)
+}
+
+#' @title given a df with two columns, stuff and section headers,
+#' it outputs the stuff where with section headers are "titles"
+#' @description basically this is the opposite of titleFlattener
+#' @param textdf the df with the text and the section headers
+#' @param spaceAbove should there be a line before the sections, Default: TRUE
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
+#'  titleUnflattener(titleFlattener(text, "##"))
+#'  }
+#' }
+#' @rdname titleUnflattener
+#' @export
+#' @importFrom dplyr %>%
+titleUnflattener <- function(textdf, spaceAbove = TRUE){
+  ## maybe add title space before title
+  if(spaceAbove) textdf$title <- paste("\n",textdf$title)
+
+  ## Now parse it out
+  res <- split(textdf$stuff, textdf$title)
+  unlist(mapply(c, names(res), res), use.names = FALSE) %>% cat(sep = "\n")
 }
 
 # package stuff --------------------------------------------------------------
@@ -341,7 +400,7 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
 }
 
 
-#' @title find functions used in each of the functions in a speficied R file
+#' @title find functions used in each of the functions in a specified R file
 #' @description This function is suitable to identify what exports are required when
 #' designing a package. Like a catch all in case sinew fails.
 #' @param paff path to the file, Default: 'R'
@@ -462,61 +521,6 @@ use_vignette()'
   cat(txt)
 
 }
-
-
-
-
-# network stuff -----------------------------------------------------------
-
-#' @title convert an edge list into 2 data frames: nodes and edges
-#' @description This function takes a data.frame like with two or three columns:
-#' `FROM` and `TO` (and potentially `VALUE`) and outputs a list containing two
-#' dataframes: Nodes and Edges. The simplest way to accomplish this task would be to
-#' create an edge list using the igraph function `igraph::from_edgelist()`, and then
-#' subsequently we could use `igraph::as_data_frame()` to create each data.frame.
-#' This function provides some additional functionality for convenience for the
-#' extremely lazy, suitable for subsequent manipulation
-#'
-#' @param df dataframe with edgeList
-#' @param Index Should the IDs of nodes start from 0 or 1. The indexing is important.
-#' By default, the edges will be 1-indexed (for VisNetwork), but if you're using
-#' network3d, change the indexing to 0, Default: 1
-#' @addLabel should the node names be displayed?
-#' @addHover should the node names be displayed on hover?
-#' @return output will be a list containing both dataframes
-#' @details nothin
-#' @importFrom dplyr pull mutate
-#' @examples
-#' \dontrun{
-#' if(interactive()){
-#'  #EXAMPLE1
-#'  }
-#' }
-#' @rdname edgeListToNodesEdges
-#' @export
-
-edgeListToNodesEdges <- function(df,addLabel = TRUE, addHover = FALSE, Index=1){
-  nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
-  nodes[,1] <- as.character(nodes[,1])
-  nodes$id <- 1:nrow(nodes)
-
-  ## and match to IDs to make edges
-  edges <- data.frame(from= match(dplyr::pull(df[,1]),nodes$name),
-                      to=   match(pull(df[,2]),nodes$name),
-                      stringsAsFactors = FALSE)
-  if (ncol(df) == 3) edges <- edges %>% mutate(value = pull(df,3))
-
-  ## indexing
-  if (Index==0){
-    edges$from <- as.integer(edges$from - 1)
-    edges$to <- as.integer(edges$to - 1)
-  }
-
-  if (addLabel) nodes$label <- nodes$name
-  if (addHover) nodes$title <- nodes$name
-  list(nodes=nodes,edges=edges)
-}
-
 
 # testing stuff -----------------------------------------------------------
 #' @title Create proposals for a testing matrix
@@ -650,62 +654,199 @@ internalFunctionParser <- function(textString){
 }
 
 
-#' @title Given a text with titles, it returns a df with each line with it's accompanying title
-#' @description This is suitable for when you have a long text and you're trying to do some NLP on it.
-#' Some examples might be: trying to digest documentation, analyzing documentation, converting to a table
-#' format something that should have never been entered into word, etc.
-#' @param text the character string containing everything you're looking for.
-#' @param titleChar what unique character denotes a title?
-#' @return returns a data frame with the erstwhile titles pushed into each row
+# network stuff -----------------------------------------------------------
+
+#' @title convert an edge list into 2 data frames: nodes and edges
+#' @description This function takes a data.frame like with two or three columns:
+#' `FROM` and `TO` (and potentially `VALUE`) and outputs a list containing two
+#' dataframes: Nodes and Edges. The simplest way to accomplish this task would be to
+#' create an edge list using the igraph function `from_edgelist()`, and then
+#' subsequently we could use `as_data_frame()` to create each data.frame.
+#' This function provides some additional functionality for convenience for the
+#' extremely lazy, suitable for subsequent manipulation
+#'
+#' @param df dataframe with edgeList
+#' @param Index Should the IDs of nodes start from 0 or 1. The indexing is important.
+#' By default, the edges will be 1-indexed (for VisNetwork), but if you're using
+#' network3d, change the indexing to 0, Default: 1
+#' @param addLabel should the node names be displayed?
+#' @param addHover should the node names be displayed on hover?
+#' @param col1 what color should from nodes be?, Default: #A58FAA
+#' @param col2 what color should from nodes be?, Default: #A6D6D6
+#' @param printResults View node degrees to help w/ trim limits?
+#' @return output will be a list containing both dataframes
+#' @details nothin
+#' @importFrom dplyr pull mutate %>% count bind_rows
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#' g <-
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname edgeListToNodesEdges
+#' @export
+
+edgeListToNodesEdges <- function(df,addLabel = TRUE, addHover = FALSE,
+                                 col1 = "#A58FAA", col2 = "#A6D6D6", Index=1,
+                                 printResults = F){
+  nodes <- data.frame(name=df[,1:2] %>% unlist %>% as.character() %>% unique())
+  nodes[,1] <- as.character(nodes[,1])
+  nodes$id <- 1:nrow(nodes)
+
+  ## and match to IDs to make edges
+  edges <- data.frame(from= match(dplyr::pull(df[,1]),nodes$name),
+                      to=   match(pull(df[,2]),nodes$name),
+                      stringsAsFactors = FALSE)
+  if (ncol(df) == 3) edges <- edges %>% mutate(value = pull(df,3))
+
+  ## indexing
+  if (Index==0){
+    edges$from <- as.integer(edges$from - 1)
+    edges$to <- as.integer(edges$to - 1)
+  }
+
+  if (addLabel) nodes$label <- nodes$name
+  if (addHover) nodes$title <- nodes$name
+
+  edges <- edges %>% mutate(arrows = "to")
+
+  ## and add node sizes and colors:
+  nodeSizeColors <- bind_rows(
+    df %>% select(1) %>% set_names("name") %>%
+      count(name, name = "value") %>% mutate(color = col1),
+    df %>% select(2) %>% set_names("name") %>%
+      count(name, name = "value") %>% mutate(color = col2)
+  )
+
+  nodes <- nodes %>% left_join(nodeSizeColors, by = "name")
+
+  if (printResults) {
+    par(mfrow=c(1,2))
+    nodes$value %>% sort %>% plot(main = "look for 'big' nodes")
+    grid()
+    nodes$value %>% hist(main="look for 'small' nodes")
+  }
+
+  return(list(nodes = nodes, edges = edges))
+}
+
+#' @title filter a network according to simple node counts
+#' @description This is a dangerous thing to do if you're interested in statistics,
+#' but for visualization purposes, it can be useful to make some decisions about what's
+#' being removed. For the purposes of this function, the count is the node's degrees.
+#' @param object The list that contains nodes and edges, (the output of createNetwork)
+#' @param eliminateAbove nodes larger than this number will be omitted, Default: NULL
+#' @param eliminateBelow nodes smaller than this number will be omitted, Default: NULL
+#' @param printResults View node degrees to help w/ trim limits?
+#' @importFrom dplyr %>% filter pull count
+#' @return a list with 3 objects, same structure as the input
 #' @details DETAILS
 #' @examples
 #' \dontrun{
 #' if(interactive()){
 #'  #EXAMPLE1
-#'  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
-#'  titleFlattener(text, "##")
 #'  }
 #' }
-#' @rdname titleFlattener
+#' @rdname truncateNodes
 #' @export
-#' @importFrom dplyr mutate filter %>%
-#' @importFrom tidyr fill
-titleFlattener <- function(text, titleChar){
-  df <- data.frame(stuff = text, stringsAsFactors = FALSE)
-  df <- df %>% dplyr::mutate(title = ifelse(grepl(titleChar, text), stuff, NA)) %>%
-    tidyr::fill(title) %>%
-    dplyr::filter(stuff != title) %>%
-    select(title, stuff)
-  return(df)
+
+truncateNodes <- function(object, eliminateAbove = NULL, eliminateBelow = NULL,
+                          printResults = F){
+  # browser()
+  ## maybe filter away the most populous ones:
+
+  nodes <- object$nodes
+  edges <- object$edges
+
+  if (!is.null(eliminateAbove)) {  ## maybe take off big nodes
+    toRemove <- nodes %>% filter(value > eliminateAbove) %>% pull(id)
+    nodes <- nodes %>% filter(!id %in% toRemove)
+  }
+
+  if (!is.null(eliminateBelow)) {  ## maybe take off little nodes
+    toRemoveS <- nodes %>% filter(value < eliminateBelow) %>% pull(id)
+    nodes <- nodes %>% filter(!id %in% toRemoveS)
+  }
+
+  edges <- edges %>% filter(from %in% nodes$id,to %in% nodes$id)
+
+  ## this in turn obviates some nodes... so remove nodes w/out edges again.
+  nodes <- nodes %>% filter(id %in% (c(edges$from, edges$to) %>% unique))
+
+  nodeCounts <- tibble(id = c(edges$from, edges$to))
+  nodeCounts <- nodeCounts %>% count(id,name = "value")
+
+  if (printResults) {
+    print(nodeCounts %>% arrange(desc(value)) %>% head(10) %>%
+            left_join(nodes %>% select(id, name)))
+
+    par(mfrow=c(1,2))
+    nodeCounts$value %>% sort %>% plot(main = "look for high n")
+    grid()
+    nodeCounts$value %>% hist(main="look for ones")
+  }
+
+  return(list(nodes = nodes, edges = edges, nodeCounts = nodeCounts))
 }
 
-#' @title given a df with two columns, stuff and section headers,
-#' it outputs the stuff where with section headers are "titles"
-#' @description basically this is the opposite of titleFlattener
-#' @param textdf the df with the text and the section headers
-#' @param spaceAbove should there be a line before the sections, Default: TRUE
+
+## Network plotter
+#' @title Create a prettier igraph chart
+#' @description FUNCTION_DESCRIPTION
+#' @param g graph from igraph
+#' @param size What should govern node sizes ('D' for Degree, , 'B' for Betweenness,
+#' 'A' for Authority, 'H' for Hub, 'C' for Eigenvector Centrality), Default: 'D'
+#' @param color What should govern the node colors? Same options as size (D,B,A,H),
+#' Default: NULL
+#' @param layout What layout should be used ('FR' for Fruchterman Reingold, 'G' for
+#' Graphopt, 'K' for Kamada Kawai), Default: 'F'
+#' @param nodeScale how much should we exaggerate the scale for node sizes, Default: 2
+#' @param as Arrow head size, Default: 0.1
+#' @param keepBackbone What percent of edges should be shown? We are using the
+#' `layout_as_backbone` function from `graphlayouts` to trim less meaningful edges
+#' for aesthetic purposes, Default = 0.5
+#' @importFrom graphlayouts layout_as_backbone
+#' @importFrom igraph hub_score layout.fruchterman.reingold layout.graphopt
+#' layout.kamada.kawai authority.score degree betweenness
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
 #' \dontrun{
 #' if(interactive()){
 #'  #EXAMPLE1
-#'  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
-#'  titleUnflattener(titleFlattener(text, "##"))
+#'
 #'  }
 #' }
-#' @rdname titleUnflattener
+#' @rdname igraphPlot
 #' @export
-#' @importFrom dplyr %>%
-titleUnflattener <- function(textdf, spaceAbove = TRUE){
-  ## maybe add title space before title
-  if(spaceAbove) textdf$title <- paste("\n",textdf$title)
 
-  ## Now parse it out
-  res <- split(textdf$stuff, textdf$title)
-  unlist(mapply(c, names(res), res), use.names = FALSE) %>% cat(sep = "\n")
+igraphPlot <- function(g, size = "D", color = NULL, layout = "FR",
+                       nodeScale = 2, as = 0.1, keepBackbone = 0.5){
+  g <- simplify(g)
+  #V(g)$grp <- as.character(rep(1:9,each=20))
+  bb <- graphlayouts::layout_as_backbone(g,keep=keepBackbone)
+  g <- subgraph.edges(g, eids = bb$backbone, delete.vertices = F)
+
+  if (size == "H") vSize <- nodeScale * hub_score(g)$vector
+  if (size == "A") vSize <- nodeScale * authority.score(g)$vector
+  if (size == "D") vSize <- nodeScale * degree(g)
+  if (size == "B") vSize <- nodeScale * igraph::betweenness(g)$vector
+
+  if (layout == "FR") lay <- layout.fruchterman.reingold
+  if (layout == "G") lay <- layout.graphopt
+  if (layout == "K") lay <- layout.kamada.kawai
+
+  plot(g,
+       main = 'TITLE',
+       vertex.color = rainbow(52),
+       vertex.size = vSize,
+       edge.arrow.size = as,
+       layout=lay
+  )
 }
 
+# Misc Helpers ------------------------------------------------------------
 
 #' @title A helper function to remember all the steps I like when mapping a
 #'   throwaway function on somethin
@@ -718,7 +859,6 @@ titleUnflattener <- function(textdf, spaceAbove = TRUE){
 #'   package furrr
 #' @return returns nothing, but will output some text to the console suitable to
 #'   be copied into your script
-#' @details
 #' @examples
 #' \dontrun{
 #' if(interactive()){
@@ -767,3 +907,26 @@ mapResult %>% map("error") %>% map(as.character) %>% enframe %>% unnest(value)
 ## keep results (rename goodStuff to whatever your desired outputname should be)
 goodStuff <- mapResult %>% map("result")'))
 }
+
+
+# data --------------------------------------------------------------------
+
+#' Some animal names
+#'
+#' Just a random list that is used w/ the toy dataset creator
+#'
+#' @format A character vector with 277 items
+#' @source <don't remember>
+"animalList"
+
+
+# other stuff -------------------------------------------------------------
+
+
+
+# Make a new function
+# 1) write backbone including inputs
+# 2) write Example/unit test covering main functionality and expectation
+# 3) fill in function
+# 4) (if first test, run usethis::usetestthat()
+# 5) Copy Example into unit test file

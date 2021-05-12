@@ -24,6 +24,7 @@ DETAILS
 \dontrun{
 if(interactive()){
  #EXAMPLE1
+ right("ABC", 2)
  }
 }
 }

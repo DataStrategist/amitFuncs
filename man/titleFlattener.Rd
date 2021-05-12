@@ -23,11 +23,6 @@ format something that should have never been entered into word, etc.
 DETAILS
 }
 \examples{
-\dontrun{
-if(interactive()){
- #EXAMPLE1
  text <- c("## First","one","however","two","","## Second","otheer"," - Happy","Thoughts")
  titleFlattener(text, "##")
- }
-}
 }

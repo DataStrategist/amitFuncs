@@ -6,3 +6,13 @@ test_that("Function left() @ L21", {
   testthat::expect_equal(left("ABC", 2), "AB")
 })
 
+
+test_that("Function mid() @ L43", {
+  testthat::expect_equal(mid("ABCDE", 2, 1), "B")
+})
+
+
+test_that("Function right() @ L64", {
+  testthat::expect_equal(right("ABC", 2), "BC")
+})
+
