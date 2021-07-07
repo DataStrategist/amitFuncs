@@ -399,6 +399,39 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
   Installer
 }
 
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param paff PARAM_DESCRIPTION, Default: 'R'
+#' @param matchingText PARAM_DESCRIPTION, Default: '.'
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @importFrom dplyr %>% discard count
+#' @importFrom tibble tibble
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname functionsFinder
+#' @export
+
+functionsFinder <- function(paff = "R", matchingText = "."){
+  ## read all files in selected folder and matching the specified text
+  a <- list.files(paff, matchingText, full.names = TRUE,recursive = TRUE) %>%
+    map(read_lines) %>%
+    ## but throw away comments
+    unlist %>% discard(~left(., 1) == "#")
+
+
+  ## Grab everything that has an open parenthesis or a package-call
+  output <- a %>% unlist %>%
+    str_extract(".+ ?<- ?function|[a-zA-Z0-9\\._\\-:]+(?=\\()") %>%
+    discard(~is.na(.)) %>%
+    discard(~left(., 1) == "_")
+
+  return(count(tibble(output), output, sort = T))
+}
 
 #' @title find functions used in each of the functions in a specified R file
 #' @description This function is suitable to identify what exports are required when
@@ -420,7 +453,7 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
 #' @importFrom readr read_lines
 functionsUsedFinder <- function(paff = "R", matchingText = "."){
   ## read all files in selected folder and matching the specified text
-  a <- list.files(paff, matchingText, full.names = TRUE) %>%
+  a <- list.files(paff, matchingText, full.names = TRUE,recursive = TRUE) %>%
     map(read_lines) %>%
     ## but throw away comments
     unlist %>% discard(~left(., 1) == "#")
