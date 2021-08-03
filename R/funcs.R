@@ -405,7 +405,8 @@ packageBulkInstaller <- function(paff, matchingText, onlyMaster = TRUE){
 #' @param matchingText PARAM_DESCRIPTION, Default: '.'
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
-#' @importFrom dplyr %>% discard count
+#' @importFrom dplyr %>% count
+#' @importfrom purrr discard
 #' @importFrom tibble tibble
 #' @examples
 #' \dontrun{
@@ -890,48 +891,60 @@ igraphPlot <- function(g, size = "D", color = NULL, layout = "FR",
 #' @param parallel if your list contains many entries, set this to TRUE in order
 #'   to use multiple cores. If setting to TRUE gives an error, install the
 #'   package furrr
+#' @param functionName Optional, what is the name of the function you will be mapping?
+#' Default: throwawayFunction1
 #' @return returns nothing, but will output some text to the console suitable to
 #'   be copied into your script
 #' @examples
 #' \dontrun{
 #' if(interactive()){
-#'  goodstuff("iris")
+#'  example <- list(a = 1, b = 2)
+#'  mapHelper("example")
 #'  }
 #' }
 #' @rdname mapHelper
 #' @export
 
-mapHelper <- function(objectName, parallel = FALSE){
+mapHelper <- function(objectName, functionName = "throwawayFunction1", parallel = FALSE){
 
-    if (!parallel){
-      mapCommand <- paste0('mapResult <- ', objectName, ' %>% set_names %>% map(~safely(throwawayFunction1)(.))')
-    } else {
-      mapCommand <- paste0('mapResult <- ', objectName, ' %>% set_names %>% furrr::future_map(~safely(throwawayFunction1)(.))')
-    }
+  if (class(objectName) != "character") stop('I expect The object name in "doublequotes".')
+
+  if (!parallel){
+    mapCommand <- paste0('mapResult <- ', objectName, ' %>%
+                         set_names %>% map(~safely(', functionName, ')(.))')
+  } else {
+    mapCommand <- paste0('mapResult <- ', objectName, ' %>%
+                         set_names %>% furrr::future_map(~safely(', functionName, ')(.))')
+  }
   cat(paste0('
-  ########### PASTE ME INTO YOUR SCRIPT AND WORK ON ME!! ##########
+  ########### PASTE ME INTO A NEW SCRIPT AND WORK ON ME!! ##########
 
-### map helper
-## Example: pick one entry of your list and show what will happen
-## Ex. ', objectName, '[[5]] %>% mutate(inArea = D_Name %in% D_Interested)
+## STEP 1 ########################
+## First let\'s figure what to put in the function.
+## Example: pick one entry of your list and write the behavior you wanna map, for example:
+head(', objectName, '[[2]])
 
-
+## STEP 2 ########################
 ## write the throwaway function that will be mapped to each entry of ', objectName, '
-throwawayFunction1 <- function(item){
-  item %>%
-  ## put your code below:
-  ## Ex. mutate(inArea = D_Name %in% D_Interested)
 
-
+', functionName, ' <- function(item){
+  if (!exists("pb")) pb <- progress::progress_bar$new(total =
+  length(eval(parse(text = "', objectName, '"))))
+  progress::pb$tick()
+  ## put your code below, for example:
+  head(item)
 }
 
-## test function:
-throwawayFunction1(', objectName, '[[5]])
+## STEP 3 ########################
+## test function on one item of your list:
+', functionName, '(', objectName, '[[2]])
 
-## slow:
-', objectName, ' %>% set_names %>% head(3) %>% map(~throwawayFunction1(.))
+## STEP 4 ########################
+## try to map through just a few entries of your list (to test)
+', objectName, ' %>% set_names %>% head(2) %>% map(~', functionName, '(.))
 
-## apply the function to the list
+########## COPY THESE NEXT COMMANDS TO YOUR ACTUAL FILE ######################
+## apply the function to the list, safely! (you can copy this into your script)
 ', mapCommand, '
 
 ## check for errors

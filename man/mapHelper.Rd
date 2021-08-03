@@ -5,11 +5,14 @@
 \title{A helper function to remember all the steps I like when mapping a
   throwaway function on somethin}
 \usage{
-mapHelper(objectName, parallel = FALSE)
+mapHelper(objectName, functionName = "throwawayFunction1", parallel = FALSE)
 }
 \arguments{
 \item{objectName}{what is the name of the list IN QUOTES that you're going to
 be mapping? Eg "iris" not iris}
+
+\item{functionName}{Optional, what is the name of the function you will be mapping?
+Default: throwawayFunction1}
 
 \item{parallel}{if your list contains many entries, set this to TRUE in order
 to use multiple cores. If setting to TRUE gives an error, install the
@@ -26,7 +29,8 @@ I always forget to set_names, to run safely, etc... so this is
 \examples{
 \dontrun{
 if(interactive()){
- goodstuff("iris")
+ example <- list(a = 1, b = 2)
+ mapHelper("example")
  }
 }
 }
