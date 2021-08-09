@@ -930,7 +930,7 @@ head(', objectName, '[[2]])
 ', functionName, ' <- function(item){
   if (!exists("pb")) pb <- progress::progress_bar$new(total =
   length(eval(parse(text = "', objectName, '"))))
-  progress::pb$tick()
+  pb$tick()
   ## put your code below, for example:
   head(item)
 }
