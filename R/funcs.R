@@ -1,3 +1,19 @@
+# text stuff --------------------------------------------------------------
+
+text_collapser <- function(x){
+  x %>% str_trim() %>% paste(collapse = "NNN") %>% 
+    ## now, remove linebreaks for commas, parenth. and pipes
+    gsub(",NNN", ", ", .) %>% 
+    gsub("\\(NNN", "(", .) %>% 
+    gsub("NNN\\)", ")", .) %>% 
+    gsub("\\%\\>\\%NNN", "%>% ", ., perl = TRUE) %>% 
+    str_split("NNN") %>% unlist %>% 
+    ## note this doesn't collapse at the "{" or "}" level. I think that's correct, but can modify later.
+    discard(~ . == "")
+}
+
+
+
 #' @title gets left bit of string
 #' @description just like excel's left func
 #' @param text stuff to parse
@@ -14,9 +30,6 @@
 #' }
 #' @rdname left
 #' @export
-
-# text stuff --------------------------------------------------------------
-
 
 left <- function(text, num_char) {
   substr(text, 1, num_char)
