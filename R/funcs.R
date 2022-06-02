@@ -1,15 +1,43 @@
 # text stuff --------------------------------------------------------------
 
-text_collapser <- function(x){
-  x %>% str_trim() %>% paste(collapse = "NNN") %>% 
-    ## now, remove linebreaks for commas, parenth. and pipes
-    gsub(",NNN", ", ", .) %>% 
-    gsub("\\(NNN", "(", .) %>% 
-    gsub("NNN\\)", ")", .) %>% 
-    gsub("\\%\\>\\%NNN", "%>% ", ., perl = TRUE) %>% 
-    str_split("NNN") %>% unlist %>% 
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param x PARAM_DESCRIPTION
+#' @param commas PARAM_DESCRIPTION, Default: TRUE
+#' @param open_p PARAM_DESCRIPTION, Default: TRUE
+#' @param close_p PARAM_DESCRIPTION, Default: TRUE
+#' @param pipe PARAM_DESCRIPTION, Default: TRUE
+#' @param no_double_lb PARAM_DESCRIPTION, Default: TRUE
+#' @importFrom stringr str_trim
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname text_collapser
+#' @export
+
+text_collapser <- function(x, commas = TRUE, open_p = TRUE,
+                           close_p = TRUE, pipe = TRUE, no_double_lb = TRUE) {
+  x <- x %>%
+    str_trim() %>%
+    paste(collapse = "NNN")
+
+  ## now, remove linebreaks for commas, parenth. and pipes
+  if (commas) x <- x %>% gsub(",NNN", ", ", .)
+  if (open_p) x <- x %>% gsub("\\(NNN", "(", .)
+  if (close_p) x <- x %>% gsub("NNN\\)", ")", .)
+  if (pipe) x <- x %>% gsub("\\%\\>\\%NNN", "%>% ", ., perl = TRUE)
+  if (no_double_lb) x <- x %>% gsub("N{3,100}", "NNN", .)
+  x <- x %>%
+    str_split("NNN") %>%
+    unlist() %>%
     ## note this doesn't collapse at the "{" or "}" level. I think that's correct, but can modify later.
     discard(~ . == "")
+  return(x)
 }
 
 
@@ -301,7 +329,7 @@ pleaseForTheLoveOfGodLetMeBuild <- function(paff = ".."){
 #' @importFrom purrr map
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @importFrom tibble tibble
-#' @importFrom dplyr mutate %>% full_join group_by summarize case_when arrange
+#' @importFrom dplyr mutate %>% full_join group_by summarize case_when arrange pull
 gitOrganizer <- function(paff = "..", matchingText = "."){
   ## Run garbage collection on all repos:
   repos <- list.files(paff, pattern = matchingText)
@@ -522,10 +550,13 @@ available::available("PKGNAME")
  - File >> new project >> new directory >> R package` (enable git)
  - Delete `hello.R` from the `/R` folder
  - Delete `hello.Rd` from the `/man` folder
+ - Delete the NAMESPACE
  (or just use `usethis::create_package("test")`)
+
  - Modify the DESCRIPTION
   person("First", "Last", email = "first.last@example.com",role = c("aut", "cre")))
 library(usethis); library(sinew)
+
  - git commit
 
 #### SETUP ASSETS:
@@ -543,7 +574,6 @@ usethis::use_news_md()
  - createOxygen for each function - commit function to memory, doubleclick title, run addin
 sinew::makeImport("R", format = "description") and add to DESCRIPTION
  - In Build menu >> More >> Configure Build tools >> Generate Documentation >> Install and Restart
- - Delete NAMESPACE
 
 Use Rstudio Build and install, or do:
 devtools::document()
@@ -568,7 +598,7 @@ REMEMBER TO CHECK DOCUMENTATION:
   - NEWS
 
 pkgdown::build_site()
-
+(you might have to check your .gitignore: if it includes "docs", then delete it and save the .gitignore)
  - git commit/push
  - set master/docs as the Repos webpage
 
@@ -606,6 +636,8 @@ use_vignette()'
 #' @importFrom tibble tibble
 #' @importFrom tidyr fill unite
 #' @importFrom readr read_lines
+#' @importFrom dplyr %>% pull filter
+#' @importFrom purrr map
 testMatrixMaker <- function(){
   ## read all files in selected folder
   a <- list.files("./R", full.names = TRUE) %>%
@@ -718,6 +750,92 @@ internalFunctionParser <- function(textString){
 
 
 # Misc Helpers ------------------------------------------------------------
+
+
+#' @title create a network chart of files in this folder
+#' @description suitable to track file dependency, including data
+#' @param remove_comments by default, lines that have comments are thrown out,
+#'   but sometimes these can contain important information about objects that
+#'   have gotten created. In this case, the value should be explicitly stated as
+#'   FALSE #'
+#' @return plots a visnetwork object... doesn't return anything.
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @rdname track_dependencies
+#' @export
+#' @importFrom visNetwork visNetwork visHierarchicalLayout
+#' @importFrom dplyr %>% rename mutate case_when select left_join
+#' @importFrom purrr map set_names discard
+#' @importFrom tibble enframe rownames_to_column
+#' @importFrom tidyr unnest
+#' @importFrom stringr str_wrap
+track_dependencies <- function(remove_comments = TRUE) {
+  to_find <- list.files(pattern = ".R$|.Rmd|.RDS|.csv|.xlsx", recursive = TRUE)
+
+  r_files <- list.files(pattern = ".R$|.Rmd", recursive = TRUE)
+
+  ## go through r_files list, looking for instances of to_find
+  content_finder <- function(this_file, remove_comments){
+    stuff <- this_file %>% readLines()
+    about <- head(stuff, 1)
+    if (remove_comments) stuff <- stuff %>% discard(~grepl("^#", .))
+    stuff <- to_find %>% set_names %>%
+      map(~grep(., stuff, value = TRUE)) %>% enframe %>% unnest(value) %>%
+      mutate(direction = case_when(
+        grepl("open|read|source", value) ~ "from",
+        grepl("write", value) ~ "to",
+        TRUE ~ "unkown"
+
+      ))
+    list(structure = stuff, about = about)
+  }
+
+  content_finder_out <- r_files %>% set_names() %>% map(~content_finder(., remove_comments))
+
+  struc <- content_finder_out %>% map("structure") %>% enframe() %>%
+    mutate(b = map(value, ~select(., -value))) %>% select(-value) %>% unnest(b, names_repair = "minimal") %>%
+    set_names(c("one", "two", "direc")) %>% unique
+
+  ## convert to network structure
+  nodes <- c(struc$one, struc$two) %>% unique %>%
+    data.frame(name = ., label = .) %>%
+    rownames_to_column(var = "id") %>%
+    mutate(shape = case_when(
+      grepl(".R$|.Rmd$", name) ~ "square",
+      TRUE ~ "diamond"
+    ),
+    color = case_when(
+      grepl(".RDS", name) ~ "purple",
+      grepl(".R$", name) ~ "orange",
+      grepl(".Rmd$", name) ~ "red",
+      grepl(".csv$", name) ~ "lightgreen",
+      grepl(".xls", name) ~ "lightblue"
+    ),
+    label = label %>% gsub("\\/", "/ ", .),
+    label = label %>% str_wrap(., width = 10))
+
+  ## add about info
+  about <- content_finder_out %>% map("about") %>% enframe %>% unnest(value) %>%
+    rename(title = value)
+
+  nodes <- nodes %>% left_join(about, by = "name")
+
+  edges <- struc %>%
+    left_join(nodes %>% select(id, name), by = c("one" = "name")) %>% rename(from = id) %>%
+    left_join(nodes %>% select(id, name), by = c("two" = "name")) %>% rename(to = id) %>%
+    rename(arrows = direc) %>% select(-one, -two) %>%
+    mutate(color = "lightgrey", arrows = struc$direc, value = 1)
+
+
+  visNetwork::visNetwork(nodes, edges) %>% visNetwork::visHierarchicalLayout(direction = "DU")
+
+}
+
 
 #' @title Perform UN-style rounding
 #' @description Rounds numbers greater than 1000 to no decimals,

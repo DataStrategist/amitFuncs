@@ -3,4 +3,5 @@ utils::globalVariables(c(".", "CRAN", "authority.score", "b", "boff", "branch",
                          "head", "hist", "id", "mainFunc", "mtime", "nam", "name",
                          "par", "param", "rainbow", "result", "rowname", "simplify",
                          "status", "stuff", "subgraph.edges", "title", "to",
-                         "toCommit", "usedFuncs", "val", "value"))
+                         "toCommit", "usedFuncs", "val", "value", "label", "direc",
+                         "one", "two"))

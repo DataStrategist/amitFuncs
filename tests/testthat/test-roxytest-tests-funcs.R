@@ -2,17 +2,17 @@
 
 context("File R/funcs.R: @tests")
 
-test_that("Function left() @ L21", {
+test_that("Function left() @ L62", {
   testthat::expect_equal(left("ABC", 2), "AB")
 })
 
 
-test_that("Function mid() @ L43", {
+test_that("Function mid() @ L84", {
   testthat::expect_equal(mid("ABCDE", 2, 1), "B")
 })
 
 
-test_that("Function right() @ L64", {
+test_that("Function right() @ L105", {
   testthat::expect_equal(right("ABC", 2), "BC")
 })
 
